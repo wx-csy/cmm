@@ -3,8 +3,10 @@
 #include <stdarg.h>
 #include <cmm/error.h>
 
-static const char *errmsg[256] = {
-    [CMM_ERROR_MYSCHAR] = "mysterious character '%s'",
+static const char *errmsg[1024] = {
+    [CMM_ERROR_MYSCHAR]     = "mysterious character '%s'",
+    
+    [CMM_ERROR_SYNTAX]      = "syntax error: %s",
 };
 
 void cmm_error(int cmm_errno, int line, int col, ...) {

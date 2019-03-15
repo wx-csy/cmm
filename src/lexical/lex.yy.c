@@ -516,6 +516,7 @@ char *yytext;
 #line 2 "src/lexical/lexical.l"
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <cmm/error.h>
 #include <syntax/cst.h>
 #include <syntax/syntax.tab.h>
@@ -541,8 +542,8 @@ static const char *const token_name[256] = {
     [UCHAR('}')] = "RC",
 };
 
-#line 545 "src/lexical/lex.yy.c"
 #line 546 "src/lexical/lex.yy.c"
+#line 547 "src/lexical/lex.yy.c"
 
 #define INITIAL 0
 
@@ -759,10 +760,10 @@ YY_DECL
 		}
 
 	{
-#line 57 "src/lexical/lexical.l"
+#line 58 "src/lexical/lexical.l"
 
 
-#line 766 "src/lexical/lex.yy.c"
+#line 767 "src/lexical/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -832,143 +833,145 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 59 "src/lexical/lexical.l"
+#line 60 "src/lexical/lexical.l"
 /* eat up whitespace */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 61 "src/lexical/lexical.l"
+#line 62 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "INT: %s", yytext);
+                        yylval = cst_node_ctor(yylineno, 0, "INT: %d", 
+                            atoi(yytext));
                         return INT;
                     }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 66 "src/lexical/lexical.l"
+#line 68 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "FLOAT: %s", yytext);
+                        yylval = cst_node_ctor(yylineno, 0, "FLOAT: %.6f", 
+                            atof(yytext));
                         return FLOAT;
                     }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 71 "src/lexical/lexical.l"
+#line 74 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "TYPE: %s", yytext);
+                        yylval = cst_node_ctor(yylineno, 0, "TYPE: %s", yytext);
                         return TYPE;
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 76 "src/lexical/lexical.l"
+#line 79 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "STRUCT");
+                        yylval = cst_node_ctor(yylineno, 0, "STRUCT");
                         return STRUCT;
                     }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 81 "src/lexical/lexical.l"
+#line 84 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "IF");
+                        yylval = cst_node_ctor(yylineno, 0, "IF");
                         return IF;
                     }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 86 "src/lexical/lexical.l"
+#line 89 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "ELSE");
+                        yylval = cst_node_ctor(yylineno, 0, "ELSE");
                         return ELSE;
                     }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 91 "src/lexical/lexical.l"
+#line 94 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "WHILE");
+                        yylval = cst_node_ctor(yylineno, 0, "WHILE");
                         return WHILE;
                     }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 96 "src/lexical/lexical.l"
+#line 99 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "RETURN");
+                        yylval = cst_node_ctor(yylineno, 0, "RETURN");
                         return RETURN;
                     }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 101 "src/lexical/lexical.l"
+#line 104 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "RELOP");
+                        yylval = cst_node_ctor(yylineno, 0, "RELOP");
                         return RELOP;
                     }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 106 "src/lexical/lexical.l"
+#line 109 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "ID: %s", yytext);
+                        yylval = cst_node_ctor(yylineno, 0, "ID: %s", yytext);
                         return ID;
                     }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 111 "src/lexical/lexical.l"
+#line 114 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "AND");
+                        yylval = cst_node_ctor(yylineno, 0, "AND");
                         return AND;
                     }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 116 "src/lexical/lexical.l"
+#line 119 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, "OR", yytext);
+                        yylval = cst_node_ctor(yylineno, 0, "OR", yytext);
                         return OR;
                     }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 121 "src/lexical/lexical.l"
+#line 124 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, 
+                        yylval = cst_node_ctor(yylineno, 0, 
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 127 "src/lexical/lexical.l"
+#line 130 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, 
+                        yylval = cst_node_ctor(yylineno, 0, 
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 133 "src/lexical/lexical.l"
+#line 136 "src/lexical/lexical.l"
 {
-                        yylval = cst_node_ctor(0, 
+                        yylval = cst_node_ctor(yylineno, 0, 
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 139 "src/lexical/lexical.l"
+#line 142 "src/lexical/lexical.l"
 { cmm_error(1, yylineno, 0, yytext); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 141 "src/lexical/lexical.l"
+#line 144 "src/lexical/lexical.l"
 ECHO;
 	YY_BREAK
-#line 972 "src/lexical/lex.yy.c"
+#line 975 "src/lexical/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1985,7 +1988,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 141 "src/lexical/lexical.l"
+#line 144 "src/lexical/lexical.l"
 
 
 int yywrap() { return 1; }
