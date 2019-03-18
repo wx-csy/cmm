@@ -7,6 +7,7 @@
 #include <syntax/syntax.tab.h>
 
 cst_node_t *yylval;
+static int lineno = 0, colno = 0, prev_lineno = 1, prev_colno = 1;
 
 #define UCHAR(ch) ((uint8_t)(ch))
 static const char *const token_name[256] = {
@@ -27,119 +28,187 @@ static const char *const token_name[256] = {
     [UCHAR('}')] = "RC",
 };
 
+#define YY_USER_ACTION                                      \
+    lineno = prev_lineno; colno = prev_colno;               \
+    for (int i = 0; yytext[i] != '\0'; i++) {               \
+        if (yytext[i] == '\n') {                            \
+            prev_lineno++; prev_colno = 1;                  \
+        } else {                                            \
+            prev_colno++;                                   \
+        }                                                   \
+    }
+
 %}
 
-%option yylineno
+%option nounput noinput
+%x C_COMMENT
+%x CPP_COMMENT
 
 digit               [0-9]
-nonzerodigit        [1-9]
-octdigit            [0-7]
-hexdigit            [0-9a-fA-F]
-decimalinteger      {nonzerodigit}{digit}*|0
-octinteger          0{octdigit}+
-hexinteger          0(x|X){hexdigit}+
-integer             {decimalinteger}|{octinteger}|{hexinteger}
 
-intpart             {digit}+
-fraction            \.{digit}+
-exponent            (e|E)[+-]?{digit}+
-pointfloat          {intpart}?{fraction}|{intpart}\.
-exponentfloat       ({intpart}|{pointfloat}){exponent}
-float               {pointfloat}|{exponentfloat}
-
-keyword             int|float|struct|return|if|else|while
-
+ppnumber            \.?{digit}([.0-9a-zA-Z_]|(e+)|(e-)|(E+)|(E-))*
 relop               >|<|>=|<=|==|!=
-and                 &&
-or                  \|\|
-
 identifier          [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 
 [ \t\n]+            /* eat up whitespace */
 
-{integer}           {
-                        yylval = cst_node_ctor(yylineno, 0, "INT: %d", 
-                            atoi(yytext));
-                        return INT;
+"/*"                { BEGIN(C_COMMENT); }
+
+<C_COMMENT>"*/"     { BEGIN(INITIAL); }
+
+<C_COMMENT>(.|\n)   /* eat up c-comment */
+
+<C_COMMENT><<EOF>>  { 
+                        cmm_error(CMM_ERROR_UNTERMCOMM, lineno, colno); 
+                        return 0; 
                     }
 
-{float}             {
-                        yylval = cst_node_ctor(yylineno, 0, "FLOAT: %.6f", 
-                            atof(yytext));
-                        return FLOAT;
+"//"                { BEGIN(CPP_COMMENT); }
+
+<CPP_COMMENT>\n     { BEGIN(INITIAL); }
+
+<CPP_COMMENT><<EOF>>    { BEGIN(INITIAL); return 0; }
+
+<CPP_COMMENT>.      /* eat up cpp-comment */
+
+{ppnumber}          {
+                        char *endptr;
+                        if (strchr(yytext, '.') || strchr(yytext, 'e') ||
+                            strchr(yytext, 'E')) {
+                            /* floating-point number literal */
+                            double value = strtod(yytext, &endptr);
+                            if (*endptr != '\0') {
+                                cmm_error(CMM_ERROR_INVFPLIT, 
+                                    lineno, colno, yytext);
+                            } else if (errno == ERANGE) {
+                                cmm_error(CMM_ERROR_FPLIT_OF,
+                                    lineno, colno, yytext);
+                            }
+                            yylval = cst_node_ctor(lineno, colno, 
+                                "FLOAT: %.6f", value);
+                            return FLOAT;
+                        
+                        } else if (yytext[0] == '0' && yytext[1] == 'x') {
+                            /* hexadecimal number literal */
+                            long value = strtol(yytext, &endptr, 16);
+                            if (*endptr != '\0') {
+                                cmm_error(CMM_ERROR_INVHEXLIT, 
+                                    lineno, colno, yytext);
+                            } else if (errno == ERANGE) {
+                                cmm_error(CMM_ERROR_INTLIT_OF,
+                                    lineno, colno, yytext);
+                            }
+                            yylval = cst_node_ctor(lineno, colno, 
+                                "INT: %d", value);
+                            return INT;
+                            
+                        } else if (yytext[0] == '0') {
+                            /* octal number literal */
+                            long value = strtol(yytext, &endptr, 8);
+                            if (*endptr != '\0') {
+                                cmm_error(CMM_ERROR_INVOCTLIT, 
+                                    lineno, colno, yytext);
+                            } else if (errno == ERANGE) {
+                                cmm_error(CMM_ERROR_INTLIT_OF,
+                                    lineno, colno, yytext);
+                            }
+                            yylval = cst_node_ctor(lineno, colno, 
+                                "INT: %d", value);
+                            return INT;
+
+                        } else {
+                            /* decimal number literal */
+                            long value = strtol(yytext, &endptr, 10);
+                            if (*endptr != '\0') {
+                                cmm_error(CMM_ERROR_INVDECLIT, 
+                                    lineno, colno, yytext);
+                            } else if (errno == ERANGE) {
+                                cmm_error(CMM_ERROR_INTLIT_OF,
+                                    lineno, colno, yytext);
+                            }
+                            yylval = cst_node_ctor(lineno, colno, 
+                                "INT: %d", value);
+                            return INT;
+
+                        }
                     }
 
 int|float           {
-                        yylval = cst_node_ctor(yylineno, 0, "TYPE: %s", yytext);
+                        yylval = cst_node_ctor(lineno, colno, "TYPE: %s", 
+                            yytext);
                         return TYPE;
-}
+                    }
 
 struct              {
-                        yylval = cst_node_ctor(yylineno, 0, "STRUCT");
+                        yylval = cst_node_ctor(lineno, colno, "STRUCT");
                         return STRUCT;
                     }
 
 if                  {
-                        yylval = cst_node_ctor(yylineno, 0, "IF");
+                        yylval = cst_node_ctor(lineno, colno, "IF");
                         return IF;
                     }
 
 else                {
-                        yylval = cst_node_ctor(yylineno, 0, "ELSE");
+                        yylval = cst_node_ctor(lineno, colno, "ELSE");
                         return ELSE;
                     }
 
 while               {
-                        yylval = cst_node_ctor(yylineno, 0, "WHILE");
+                        yylval = cst_node_ctor(lineno, colno, "WHILE");
                         return WHILE;
                     }
 
 return              {
-                        yylval = cst_node_ctor(yylineno, 0, "RETURN");
+                        yylval = cst_node_ctor(lineno, colno, "RETURN");
                         return RETURN;
                     }
 
-relop               {
-                        yylval = cst_node_ctor(yylineno, 0, "RELOP");
+{relop}             {
+                        yylval = cst_node_ctor(lineno, colno, "RELOP");
                         return RELOP;
                     }
 
 {identifier}        {
-                        yylval = cst_node_ctor(yylineno, 0, "ID: %s", yytext);
+                        yylval = cst_node_ctor(lineno, colno, 
+                            "ID: %s", yytext);
                         return ID;
                     }
 
 &&                  {
-                        yylval = cst_node_ctor(yylineno, 0, "AND");
+                        yylval = cst_node_ctor(lineno, colno, "AND");
                         return AND;
                     }
 
 \|\|                {
-                        yylval = cst_node_ctor(yylineno, 0, "OR", yytext);
+                        yylval = cst_node_ctor(lineno, colno, "OR");
                         return OR;
                     }
 
 [(){};!=.,]         {
-                        yylval = cst_node_ctor(yylineno, 0, 
+                        yylval = cst_node_ctor(lineno, colno, 
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
 [-+/*]              {
-                        yylval = cst_node_ctor(yylineno, 0, 
+                        yylval = cst_node_ctor(lineno, colno, 
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
 \[|\]               {
-                        yylval = cst_node_ctor(yylineno, 0, 
+                        yylval = cst_node_ctor(lineno, colno, 
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
-.                   { cmm_error(1, yylineno, 0, yytext); }
+.                   { 
+                        cmm_error(CMM_ERROR_MYSCHAR, lineno, colno, 
+                            yytext); 
+                    }
                 
 %%
 

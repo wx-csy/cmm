@@ -9,29 +9,33 @@ int yylex(void);
 void yyerror(const char*);
 
 #define BUILD_CST_NODE0($$, ...) { \
-        $$ = cst_node_ctor(0, 0, ##__VA_ARGS__); \
+        $$ = NULL; \
     }
 
 #define BUILD_CST_NODE1($$, $1, fmt, ...) { \
-        $$ = cst_node_ctor($1->line, 1, fmt " (%d)", ##__VA_ARGS__, $1->line); \
+        int line = $1 ? $1->line : 0; \
+        $$ = cst_node_ctor(line, 1, fmt " (%d)", ##__VA_ARGS__, line); \
         $$->child[0] = $1; \
     }
 
 #define BUILD_CST_NODE2($$, $1, $2, fmt, ...) { \
-        $$ = cst_node_ctor($1->line, 2, fmt " (%d)", ##__VA_ARGS__, $1->line); \
+	int line = $1 ? $1->line : 0; \
+        $$ = cst_node_ctor(line, 2, fmt " (%d)", ##__VA_ARGS__, line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
     }
 
 #define BUILD_CST_NODE3($$, $1, $2, $3, fmt, ...) { \
-        $$ = cst_node_ctor($1->line, 3, fmt " (%d)", ##__VA_ARGS__, $1->line); \
+	int line = $1 ? $1->line : 0; \
+        $$ = cst_node_ctor(line, 3, fmt " (%d)", ##__VA_ARGS__, line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
     }
     
 #define BUILD_CST_NODE4($$, $1, $2, $3, $4, fmt, ...) { \
-        $$ = cst_node_ctor($1->line, 4, fmt " (%d)", ##__VA_ARGS__, $1->line); \
+	int line = $1 ? $1->line : 0; \
+        $$ = cst_node_ctor(line, 4, fmt " (%d)", ##__VA_ARGS__, line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -39,7 +43,8 @@ void yyerror(const char*);
     }
 
 #define BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, fmt, ...) { \
-        $$ = cst_node_ctor($1->line, 5, fmt " (%d)", ##__VA_ARGS__, $1->line); \
+	int line = $1 ? $1->line : 0; \
+        $$ = cst_node_ctor(line, 5, fmt " (%d)", ##__VA_ARGS__, line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -48,7 +53,8 @@ void yyerror(const char*);
     }
     
 #define BUILD_CST_NODE6($$, $1, $2, $3, $4, $5, $6, fmt, ...) { \
-        $$ = cst_node_ctor($1->line, 6, fmt " (%d)", ##__VA_ARGS__, $1->line); \
+	int line = $1 ? $1->line : 0; \
+        $$ = cst_node_ctor(line, 6, fmt " (%d)", ##__VA_ARGS__, line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -58,7 +64,8 @@ void yyerror(const char*);
     }
     
 #define BUILD_CST_NODE7($$, $1, $2, $3, $4, $5, $6, $7, fmt, ...) { \
-        $$ = cst_node_ctor($1->line, 7, fmt " (%d)", ##__VA_ARGS__, $1->line); \
+	int line = $1 ? $1->line : 0; \
+        $$ = cst_node_ctor(line, 7, fmt " (%d)", ##__VA_ARGS__, line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -89,7 +96,8 @@ void yyerror(const char*);
 
 Program : 
       ExtDefList                        { BUILD_CST_NODE1($$, $1, "Program"); 
-                                          cst_node_print($$, 0); }
+                                          if (cmm_nr_error == 0)
+                                              cst_node_print($$, 0); }
     ;
 
 ExtDefList : 

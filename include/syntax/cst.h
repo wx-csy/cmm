@@ -20,7 +20,7 @@ static inline cst_node_t
     ret->line = line;
     ret->buf = malloc(1 + vsnprintf(NULL, 0, fmt, args1));
     vsprintf(ret->buf, fmt, args2);
-    printf("[CST_NODE] %s\n", ret->buf);
+//    printf("[CST_NODE] %s\n", ret->buf);
     ret->nr_child = nr_child;
     ret->child = calloc(nr_child, sizeof(cst_node_t *));
     va_end(args1); va_end(args2);
