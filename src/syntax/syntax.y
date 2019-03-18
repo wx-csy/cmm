@@ -78,6 +78,7 @@ void yyerror(const char*);
 %}
 
 %define api.value.type {cst_node_t *}
+%define parse.error verbose
 %destructor { cst_node_dtor($$); } <>
 %start  Program
 %token  INT FLOAT ID TYPE
@@ -162,6 +163,7 @@ ParamDec :
 
 CompSt : 
       '{' DefList StmtList '}'          { BUILD_CST_NODE4($$, $1, $2, $3, $4, "CompSt"); }
+    | '{' error '}'                     { BUILD_CST_NODE2($$, $1, $3, "CompSt (Error)"); }
     ;
 
 StmtList :                              
@@ -171,6 +173,7 @@ StmtList :
 
 Stmt : 
       Exp ';'                           { BUILD_CST_NODE2($$, $1, $2, "Stmt"); }
+    | error ';'                         { BUILD_CST_NODE1($$, $2, "Stmt (Error)"); }
     | CompSt                            { BUILD_CST_NODE1($$, $1, "Stmt"); }
     | RETURN Exp ';'                    { BUILD_CST_NODE3($$, $1, $2, $3, "Stmt"); }
     | IF '(' Exp ')' Stmt               { BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, "Stmt"); }

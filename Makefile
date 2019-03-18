@@ -18,8 +18,9 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 CFLAGS += -I./$(INCLUDE_DIR)
 
 .DEFAULT_GOAL = run
-.PHONY : lex syntax parser run clean
+.PHONY : $(TARGET_NAME) run clean
 
+# generate dependency files
 $(BUILD_DIR)/%.d : $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@echo + [DEP] $@

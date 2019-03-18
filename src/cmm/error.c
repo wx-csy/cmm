@@ -15,7 +15,7 @@ static const char *errmsg[1024] = {
     [CMM_ERROR_FPLIT_OF]    = "floating-point literal '%s' overflow",
     [CMM_ERROR_INTLIT_OF]   = "integer literal '%s' overflow",
 
-    [CMM_ERROR_SYNTAX]      = "syntax error: %s",
+    [CMM_ERROR_SYNTAX]      = "%s",
 };
 
 void cmm_error(int cmm_errno, int line, int col, ...) {
