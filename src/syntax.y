@@ -1,8 +1,8 @@
 %{
 
 #include <stdio.h>
-#include <cmm/error.h>
-#include <syntax/cst.h>
+#include "error.h"
+#include "cst.h"
 
 cst_node_t *cst;
 int yylex(void);
@@ -82,23 +82,25 @@ void yyerror(const char*);
 %destructor { cst_node_dtor($$); } <>
 %start  Program
 %token  INT FLOAT ID TYPE
-%token  IF WHILE ELSE RETURN STRUCT 
+%token  IF WHILE RETURN STRUCT 
 
 %right      '='
 %left       AND OR
 %left       RELOP
 %left       '+' '-'
 %left       '*' '/'
-%nonassoc   UMINUS
+%right      '!' UMINUS
+%left       '.' '[' ']' '(' ')'
+
+%nonassoc   LOWER_THAN_ELSE
+%nonassoc   ELSE
 
 %%
 
 // High level definitions
 
 Program : 
-      ExtDefList                        { BUILD_CST_NODE1($$, $1, "Program"); 
-                                          if (cmm_nr_error == 0)
-                                              cst_node_print($$, 0); }
+      ExtDefList                        { cst = $1; $$ = NULL; }
     ;
 
 ExtDefList : 
@@ -176,7 +178,8 @@ Stmt :
     | error ';'                         { BUILD_CST_NODE1($$, $2, "Stmt (Error)"); }
     | CompSt                            { BUILD_CST_NODE1($$, $1, "Stmt"); }
     | RETURN Exp ';'                    { BUILD_CST_NODE3($$, $1, $2, $3, "Stmt"); }
-    | IF '(' Exp ')' Stmt               { BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, "Stmt"); }
+    | IF '(' Exp ')' Stmt %prec LOWER_THAN_ELSE
+                                        { BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, "Stmt"); }
     | IF '(' Exp ')' Stmt ELSE Stmt     { BUILD_CST_NODE7($$, $1, $2, $3, $4, $5, $6, $7, "Stmt"); }
     | WHILE '(' Exp ')' Stmt            { BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, "Stmt"); }
     ;
@@ -234,6 +237,8 @@ Args :
 
 int main() {
     yyparse();
+    if (cmm_nr_error == 0) cst_node_print(cst, 0);
+    cst_node_dtor(cst);
 }
 
 void yyerror(char const *msg) {

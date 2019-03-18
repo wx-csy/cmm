@@ -1,5 +1,5 @@
 int main() 
 {
-  int i = 09;
-  int j = 0x3G;
+  int i = 09;       // lex error
+  int j = 0x3G;     // lex error
 }

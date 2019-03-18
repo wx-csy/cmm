@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <cmm/error.h>
+#include "error.h"
 
 int cmm_nr_error = 0;
 

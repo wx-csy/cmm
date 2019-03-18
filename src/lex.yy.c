@@ -1,6 +1,6 @@
-#line 2 "src/lexical/lex.yy.c"
+#line 2 "src/lex.yy.c"
 
-#line 4 "src/lexical/lex.yy.c"
+#line 4 "src/lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -488,14 +488,14 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "src/lexical/lexical.l"
-#line 2 "src/lexical/lexical.l"
+#line 1 "src/lexical.l"
+#line 2 "src/lexical.l"
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <cmm/error.h>
-#include <syntax/cst.h>
-#include <syntax/syntax.tab.h>
+#include "error.h"
+#include "cst.h"
+#include "syntax.tab.h"
 
 cst_node_t *yylval;
 static int lineno = 0, colno = 0, prev_lineno = 1, prev_colno = 1;
@@ -529,10 +529,10 @@ static const char *const token_name[256] = {
         }                                                   \
     }
 
-#line 533 "src/lexical/lex.yy.c"
+#line 533 "src/lex.yy.c"
 #define YY_NO_INPUT 1
 
-#line 536 "src/lexical/lex.yy.c"
+#line 536 "src/lex.yy.c"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -749,10 +749,10 @@ YY_DECL
 		}
 
 	{
-#line 53 "src/lexical/lexical.l"
+#line 53 "src/lexical.l"
 
 
-#line 756 "src/lexical/lex.yy.c"
+#line 756 "src/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -812,27 +812,27 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 55 "src/lexical/lexical.l"
+#line 55 "src/lexical.l"
 /* eat up whitespace */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 57 "src/lexical/lexical.l"
+#line 57 "src/lexical.l"
 { BEGIN(C_COMMENT); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 59 "src/lexical/lexical.l"
+#line 59 "src/lexical.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 61 "src/lexical/lexical.l"
+#line 61 "src/lexical.l"
 /* eat up c-comment */
 	YY_BREAK
 case YY_STATE_EOF(C_COMMENT):
-#line 63 "src/lexical/lexical.l"
+#line 63 "src/lexical.l"
 { 
                         cmm_error(CMM_ERROR_UNTERMCOMM, lineno, colno); 
                         return 0; 
@@ -840,27 +840,27 @@ case YY_STATE_EOF(C_COMMENT):
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 68 "src/lexical/lexical.l"
+#line 68 "src/lexical.l"
 { BEGIN(CPP_COMMENT); }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 70 "src/lexical/lexical.l"
+#line 70 "src/lexical.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case YY_STATE_EOF(CPP_COMMENT):
-#line 72 "src/lexical/lexical.l"
+#line 72 "src/lexical.l"
 { BEGIN(INITIAL); return 0; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 74 "src/lexical/lexical.l"
+#line 74 "src/lexical.l"
 /* eat up cpp-comment */
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 76 "src/lexical/lexical.l"
+#line 76 "src/lexical.l"
 {
                         char *endptr;
                         if (strchr(yytext, '.') || strchr(yytext, 'e') ||
@@ -925,7 +925,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 138 "src/lexical/lexical.l"
+#line 138 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "TYPE: %s", 
                             yytext);
@@ -934,7 +934,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 144 "src/lexical/lexical.l"
+#line 144 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "STRUCT");
                         return STRUCT;
@@ -942,7 +942,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 149 "src/lexical/lexical.l"
+#line 149 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "IF");
                         return IF;
@@ -950,7 +950,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 154 "src/lexical/lexical.l"
+#line 154 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "ELSE");
                         return ELSE;
@@ -958,7 +958,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 159 "src/lexical/lexical.l"
+#line 159 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "WHILE");
                         return WHILE;
@@ -966,7 +966,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 164 "src/lexical/lexical.l"
+#line 164 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "RETURN");
                         return RETURN;
@@ -974,7 +974,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 169 "src/lexical/lexical.l"
+#line 169 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "RELOP");
                         return RELOP;
@@ -982,7 +982,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 174 "src/lexical/lexical.l"
+#line 174 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, 
                             "ID: %s", yytext);
@@ -991,7 +991,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 180 "src/lexical/lexical.l"
+#line 180 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "AND");
                         return AND;
@@ -999,7 +999,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 185 "src/lexical/lexical.l"
+#line 185 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, "OR");
                         return OR;
@@ -1007,7 +1007,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 190 "src/lexical/lexical.l"
+#line 190 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, 
                             token_name[UCHAR(yytext[0])]);
@@ -1016,7 +1016,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 196 "src/lexical/lexical.l"
+#line 196 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, 
                             token_name[UCHAR(yytext[0])]);
@@ -1025,7 +1025,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 202 "src/lexical/lexical.l"
+#line 202 "src/lexical.l"
 {
                         yylval = cst_node_ctor(lineno, colno, 
                             token_name[UCHAR(yytext[0])]);
@@ -1034,7 +1034,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 208 "src/lexical/lexical.l"
+#line 208 "src/lexical.l"
 { 
                         cmm_error(CMM_ERROR_MYSCHAR, lineno, colno, 
                             yytext); 
@@ -1042,10 +1042,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 213 "src/lexical/lexical.l"
+#line 213 "src/lexical.l"
 ECHO;
 	YY_BREAK
-#line 1049 "src/lexical/lex.yy.c"
+#line 1049 "src/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2013,7 +2013,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 213 "src/lexical/lexical.l"
+#line 213 "src/lexical.l"
 
 
 int yywrap() { return 1; }

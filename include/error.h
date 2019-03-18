@@ -1,5 +1,5 @@
-#ifndef __CMM_ERROR_H__
-#define __CMM_ERROR_H__
+#ifndef __ERROR_H__
+#define __ERROR_H__
 
 extern int cmm_nr_error;
 

@@ -1,5 +1,5 @@
-#ifndef __SYNTAX_CST_H__
-#define __SYNTAX_CST_H__
+#ifndef __CST_H__
+#define __CST_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,8 +35,7 @@ static inline void cst_node_print(cst_node_t *cst, int indent) {
         cst_node_print(cst->child[i], indent + 1);
 }
 
-static inline void
-cst_node_dtor(cst_node_t *cst) {
+static inline void cst_node_dtor(cst_node_t *cst) {
     if (cst == NULL) return;
     for (int i = 0; i < cst->nr_child; i++) 
         cst_node_dtor(cst->child[i]);

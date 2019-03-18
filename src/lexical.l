@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <cmm/error.h>
-#include <syntax/cst.h>
-#include <syntax/syntax.tab.h>
+#include "error.h"
+#include "cst.h"
+#include "syntax.tab.h"
 
 cst_node_t *yylval;
 static int lineno = 0, colno = 0, prev_lineno = 1, prev_colno = 1;

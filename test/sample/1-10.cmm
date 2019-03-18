@@ -5,6 +5,6 @@ int main()
     /*
     nested comment */
     */
-    */
+    */  // syntax error
     int i = 1;
 }
