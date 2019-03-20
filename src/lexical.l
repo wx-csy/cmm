@@ -75,7 +75,22 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
 
 {ppnumber}          {
                         char *endptr;
-                        if (strchr(yytext, '.') || strchr(yytext, 'e') ||
+                        
+                        if (yytext[0] == '0' && yytext[1] == 'x') {
+                            /* hexadecimal number literal */
+                            long value = strtol(yytext, &endptr, 16);
+                            if (*endptr != '\0') {
+                                cmm_error(CMM_ERROR_INVHEXLIT, 
+                                    lineno, colno, yytext);
+                            } else if (errno == ERANGE) {
+                                cmm_error(CMM_ERROR_INTLIT_OF,
+                                    lineno, colno, yytext);
+                            }
+                            yylval = cst_node_ctor(lineno, colno, 
+                                "INT: %d", value);
+                            return INT;
+
+                        } if (strchr(yytext, '.') || strchr(yytext, 'e') ||
                             strchr(yytext, 'E')) {
                             /* floating-point number literal */
                             double value = strtod(yytext, &endptr);
@@ -89,21 +104,7 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
                             yylval = cst_node_ctor(lineno, colno, 
                                 "FLOAT: %.6f", value);
                             return FLOAT;
-                        
-                        } else if (yytext[0] == '0' && yytext[1] == 'x') {
-                            /* hexadecimal number literal */
-                            long value = strtol(yytext, &endptr, 16);
-                            if (*endptr != '\0') {
-                                cmm_error(CMM_ERROR_INVHEXLIT, 
-                                    lineno, colno, yytext);
-                            } else if (errno == ERANGE) {
-                                cmm_error(CMM_ERROR_INTLIT_OF,
-                                    lineno, colno, yytext);
-                            }
-                            yylval = cst_node_ctor(lineno, colno, 
-                                "INT: %d", value);
-                            return INT;
-                            
+                                
                         } else if (yytext[0] == '0') {
                             /* octal number literal */
                             long value = strtol(yytext, &endptr, 8);
