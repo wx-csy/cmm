@@ -2,12 +2,14 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include "cmm.h"
 #include "error.h"
 #include "cst.h"
 #include "syntax.tab.h"
 
 cst_node_t *yylval;
-static int lineno = 0, colno = 0, prev_lineno = 1, prev_colno = 1;
+cmm_loc_t yylloc = CMM_LOC_INITIALIZER;
+static cmm_loc_t prev_loc = CMM_LOC_INITIALIZER;
 
 #define UCHAR(ch) ((uint8_t)(ch))
 static const char *const token_name[256] = {
@@ -29,12 +31,12 @@ static const char *const token_name[256] = {
 };
 
 #define YY_USER_ACTION                                      \
-    lineno = prev_lineno; colno = prev_colno;               \
+    yylloc = prev_loc;                                      \
     for (int i = 0; yytext[i] != '\0'; i++) {               \
         if (yytext[i] == '\n') {                            \
-            prev_lineno++; prev_colno = 1;                  \
+            prev_loc.line++; prev_loc.col = 1;              \
         } else {                                            \
-            prev_colno++;                                   \
+            prev_loc.col++;                                 \
         }                                                   \
     }
 
@@ -61,7 +63,7 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
 <C_COMMENT>(.|\n)   /* eat up c-comment */
 
 <C_COMMENT><<EOF>>  { 
-                        cmm_error(CMM_ERROR_UNTERMCOMM, lineno, colno); 
+                        cmm_error(CMM_ERROR_UNTERMCOMM, yylloc); 
                         return 0; 
                     }
 
@@ -76,17 +78,16 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
 {ppnumber}          {
                         char *endptr;
                         
+                        errno = 0;                        
                         if (yytext[0] == '0' && yytext[1] == 'x') {
                             /* hexadecimal number literal */
                             long value = strtol(yytext, &endptr, 16);
                             if (*endptr != '\0') {
-                                cmm_error(CMM_ERROR_INVHEXLIT, 
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_INVHEXLIT, yylloc, yytext);
                             } else if (errno == ERANGE) {
-                                cmm_error(CMM_ERROR_INTLIT_OF,
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_INTLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(lineno, colno, 
+                            yylval = cst_node_ctor(yylloc, 1, 
                                 "INT: %d", value);
                             return INT;
 
@@ -95,13 +96,11 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
                             /* floating-point number literal */
                             double value = strtod(yytext, &endptr);
                             if (*endptr != '\0') {
-                                cmm_error(CMM_ERROR_INVFPLIT, 
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_INVFPLIT, yylloc, yytext);
                             } else if (errno == ERANGE) {
-                                cmm_error(CMM_ERROR_FPLIT_OF,
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_FPLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(lineno, colno, 
+                            yylval = cst_node_ctor(yylloc, 1,
                                 "FLOAT: %.6f", value);
                             return FLOAT;
                                 
@@ -109,13 +108,11 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
                             /* octal number literal */
                             long value = strtol(yytext, &endptr, 8);
                             if (*endptr != '\0') {
-                                cmm_error(CMM_ERROR_INVOCTLIT, 
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_INVOCTLIT, yylloc, yytext);
                             } else if (errno == ERANGE) {
-                                cmm_error(CMM_ERROR_INTLIT_OF,
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_INTLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(lineno, colno, 
+                            yylval = cst_node_ctor(yylloc, 1, 
                                 "INT: %d", value);
                             return INT;
 
@@ -123,13 +120,11 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
                             /* decimal number literal */
                             long value = strtol(yytext, &endptr, 10);
                             if (*endptr != '\0') {
-                                cmm_error(CMM_ERROR_INVDECLIT, 
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_INVDECLIT, yylloc, yytext);
                             } else if (errno == ERANGE) {
-                                cmm_error(CMM_ERROR_INTLIT_OF,
-                                    lineno, colno, yytext);
+                                cmm_error(CMM_ERROR_INTLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(lineno, colno, 
+                            yylval = cst_node_ctor(yylloc, 1,
                                 "INT: %d", value);
                             return INT;
 
@@ -137,78 +132,75 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
                     }
 
 int|float           {
-                        yylval = cst_node_ctor(lineno, colno, "TYPE: %s", 
-                            yytext);
+                        yylval = cst_node_ctor(yylloc, 1, "TYPE: %s", yytext);
                         return TYPE;
                     }
 
 struct              {
-                        yylval = cst_node_ctor(lineno, colno, "STRUCT");
+                        yylval = cst_node_ctor(yylloc, 1, "STRUCT");
                         return STRUCT;
                     }
 
 if                  {
-                        yylval = cst_node_ctor(lineno, colno, "IF");
+                        yylval = cst_node_ctor(yylloc, 1, "IF");
                         return IF;
                     }
 
 else                {
-                        yylval = cst_node_ctor(lineno, colno, "ELSE");
+                        yylval = cst_node_ctor(yylloc, 1, "ELSE");
                         return ELSE;
                     }
 
 while               {
-                        yylval = cst_node_ctor(lineno, colno, "WHILE");
+                        yylval = cst_node_ctor(yylloc, 1, "WHILE");
                         return WHILE;
                     }
 
 return              {
-                        yylval = cst_node_ctor(lineno, colno, "RETURN");
+                        yylval = cst_node_ctor(yylloc, 1, "RETURN");
                         return RETURN;
                     }
 
 {relop}             {
-                        yylval = cst_node_ctor(lineno, colno, "RELOP");
+                        yylval = cst_node_ctor(yylloc, 1, "RELOP");
                         return RELOP;
                     }
 
 {identifier}        {
-                        yylval = cst_node_ctor(lineno, colno, 
-                            "ID: %s", yytext);
+                        yylval = cst_node_ctor(yylloc, 1, "ID: %s", yytext);
                         return ID;
                     }
 
 &&                  {
-                        yylval = cst_node_ctor(lineno, colno, "AND");
+                        yylval = cst_node_ctor(yylloc, 1, "AND");
                         return AND;
                     }
 
 \|\|                {
-                        yylval = cst_node_ctor(lineno, colno, "OR");
+                        yylval = cst_node_ctor(yylloc, 1, "OR");
                         return OR;
                     }
 
 [(){};!=.,]         {
-                        yylval = cst_node_ctor(lineno, colno, 
+                        yylval = cst_node_ctor(yylloc, 1, 
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
 [-+/*]              {
-                        yylval = cst_node_ctor(lineno, colno, 
+                        yylval = cst_node_ctor(yylloc, 1,
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
 \[|\]               {
-                        yylval = cst_node_ctor(lineno, colno, 
+                        yylval = cst_node_ctor(yylloc, 1,
                             token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
 .                   { 
-                        cmm_error(CMM_ERROR_MYSCHAR, lineno, colno, 
-                            yytext); 
+                        cmm_error(CMM_ERROR_MYSCHAR, yylloc, yytext); 
                     }
                 
 %%

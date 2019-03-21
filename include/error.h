@@ -1,6 +1,8 @@
 #ifndef __ERROR_H__
 #define __ERROR_H__
 
+#include "cmm.h"
+
 extern int cmm_nr_error;
 
 enum CMM_ERROR_NO {
@@ -18,7 +20,7 @@ enum CMM_ERROR_NO {
     CMM_ERROR_SYNTAX            = 257,
 };
 
-void cmm_error(int cmm_errno, int line, int col, ...);
+void cmm_error(int cmm_errno, cmm_loc_t loc, ...);
 
 #endif
 

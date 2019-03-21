@@ -1,6 +1,7 @@
 %{
 
 #include <stdio.h>
+#include "cmm.h"
 #include "error.h"
 #include "cst.h"
 
@@ -13,29 +14,29 @@ void yyerror(const char*);
     }
 
 #define BUILD_CST_NODE1($$, $1, fmt, ...) { \
-        int line = $1 ? $1->line : 0; \
-        $$ = cst_node_ctor(line, 1, fmt " (%d)", ##__VA_ARGS__, line); \
+        $$ = cst_node_ctor(yylloc, 1, fmt " (%d)", ##__VA_ARGS__, \
+            yylloc.line); \
         $$->child[0] = $1; \
     }
 
 #define BUILD_CST_NODE2($$, $1, $2, fmt, ...) { \
-	int line = $1 ? $1->line : 0; \
-        $$ = cst_node_ctor(line, 2, fmt " (%d)", ##__VA_ARGS__, line); \
+        $$ = cst_node_ctor(yylloc, 2, fmt " (%d)", ##__VA_ARGS__, \
+            yylloc.line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
     }
 
 #define BUILD_CST_NODE3($$, $1, $2, $3, fmt, ...) { \
-	int line = $1 ? $1->line : 0; \
-        $$ = cst_node_ctor(line, 3, fmt " (%d)", ##__VA_ARGS__, line); \
+        $$ = cst_node_ctor(yylloc, 3, fmt " (%d)", ##__VA_ARGS__, \
+            yylloc.line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
     }
     
 #define BUILD_CST_NODE4($$, $1, $2, $3, $4, fmt, ...) { \
-	int line = $1 ? $1->line : 0; \
-        $$ = cst_node_ctor(line, 4, fmt " (%d)", ##__VA_ARGS__, line); \
+        $$ = cst_node_ctor(yylloc, 4, fmt " (%d)", ##__VA_ARGS__, \
+            yylloc.line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -43,8 +44,8 @@ void yyerror(const char*);
     }
 
 #define BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, fmt, ...) { \
-	int line = $1 ? $1->line : 0; \
-        $$ = cst_node_ctor(line, 5, fmt " (%d)", ##__VA_ARGS__, line); \
+        $$ = cst_node_ctor(yylloc, 5, fmt " (%d)", ##__VA_ARGS__, \
+            yylloc.line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -53,8 +54,8 @@ void yyerror(const char*);
     }
     
 #define BUILD_CST_NODE6($$, $1, $2, $3, $4, $5, $6, fmt, ...) { \
-	int line = $1 ? $1->line : 0; \
-        $$ = cst_node_ctor(line, 6, fmt " (%d)", ##__VA_ARGS__, line); \
+        $$ = cst_node_ctor(yylloc, 6, fmt " (%d)", ##__VA_ARGS__, \
+            yylloc.line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -64,8 +65,8 @@ void yyerror(const char*);
     }
     
 #define BUILD_CST_NODE7($$, $1, $2, $3, $4, $5, $6, $7, fmt, ...) { \
-	int line = $1 ? $1->line : 0; \
-        $$ = cst_node_ctor(line, 7, fmt " (%d)", ##__VA_ARGS__, line); \
+        $$ = cst_node_ctor(yylloc, 7, fmt " (%d)", ##__VA_ARGS__, \
+            yylloc.line); \
         $$->child[0] = $1; \
         $$->child[1] = $2; \
         $$->child[2] = $3; \
@@ -75,6 +76,16 @@ void yyerror(const char*);
         $$->child[6] = $7; \
     }
 
+#define YYLTYPE cmm_loc_t;
+
+#define YYLLOC_DEFAULT(Cur, Rhs, N) {       \
+    do {                                    \
+        if (N) {                            \
+            (Cur) = YYRHSLOC(Rhs, 1);       \
+        } else {                            \
+            (Cur) = YYRHSLOC(Rhs, 0);       \
+        }                                   \
+    while (0)
 %}
 
 %define api.value.type {cst_node_t *}
@@ -112,6 +123,7 @@ ExtDef :
       Specifier ExtDecList ';'          { BUILD_CST_NODE3($$, $1, $2, $3, "ExtDef"); }
     | Specifier ';'                     { BUILD_CST_NODE2($$, $1, $2, "ExtDef"); }
     | Specifier FunDec CompSt           { BUILD_CST_NODE3($$, $1, $2, $3, "ExtDef"); }
+    | error                             { BUILD_CST_NODE0($$, "ExtDef (Error)"); }
     ;
 
 ExtDecList : 
@@ -221,7 +233,7 @@ Exp :
     | '!' Exp   %prec UMINUS            { BUILD_CST_NODE2($$, $1, $2, "Exp"); }
     | ID '(' Args ')'                   { BUILD_CST_NODE4($$, $1, $2, $3, $4, "Exp"); }
     | ID '(' ')'                        { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp '(' Exp ')'                   { BUILD_CST_NODE4($$, $1, $2, $3, $4, "Exp"); }
+    | Exp '[' Exp ']'                   { BUILD_CST_NODE4($$, $1, $2, $3, $4, "Exp"); }
     | Exp '.' ID                        { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
     | ID                                { BUILD_CST_NODE1($$, $1, "Exp"); }
     | INT                               { BUILD_CST_NODE1($$, $1, "Exp"); }
@@ -242,6 +254,6 @@ int main() {
 }
 
 void yyerror(char const *msg) {
-    cmm_error(CMM_ERROR_SYNTAX, 0, 0, msg);
+    cmm_error(CMM_ERROR_SYNTAX, yylloc, msg);
 }
 

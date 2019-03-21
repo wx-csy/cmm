@@ -4,20 +4,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "cmm.h"
 
 typedef struct cst_node {
     char *buf;
     int nr_child;
-    int line;
+    cmm_loc_t loc;
     struct cst_node **child;
 } cst_node_t;
 
 static inline cst_node_t
-*cst_node_ctor(int line, int nr_child, const char *fmt, ...) {
+*cst_node_ctor(cmm_loc_t loc, int nr_child, const char *fmt, ...) {
     va_list args1, args2;
     va_start(args1, fmt); va_copy(args2, args1);
     cst_node_t *ret = malloc(sizeof(cst_node_t));
-    ret->line = line;
+    ret->loc = loc;
     ret->buf = malloc(1 + vsnprintf(NULL, 0, fmt, args1));
     vsprintf(ret->buf, fmt, args2);
 //    printf("[CST_NODE] %s\n", ret->buf);

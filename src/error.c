@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "cmm.h"
 #include "error.h"
 
 int cmm_nr_error = 0;
@@ -18,12 +19,12 @@ static const char *errmsg[1024] = {
     [CMM_ERROR_SYNTAX]      = "%s",
 };
 
-void cmm_error(int cmm_errno, int line, int col, ...) {
+void cmm_error(int cmm_errno, cmm_loc_t loc, ...) {
     va_list ap;
     cmm_nr_error++;
     fprintf(stderr, "error type %c at line %d, col %d: ", 
-        cmm_errno < 256 ? 'A' : 'B', line, col);
-    va_start(ap, col);
+        cmm_errno < 256 ? 'A' : 'B', loc.line, loc.col);
+    va_start(ap, loc);
     vfprintf(stderr, errmsg[cmm_errno], ap);
     va_end(ap);
     fprintf(stderr, "\n");
