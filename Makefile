@@ -5,20 +5,24 @@ LD      = gcc
 FLEX	= flex
 BISON	= bison
 
-CFLAGS  += -std=gnu99 -Wall
-CFLAGS  += -ggdb -fsanitize=undefined -fsanitize=address
+CFLAGS  += -std=gnu99 -Wall -ggdb
+# CFLAGS  += -fsanitize=undefined -fsanitize=address
 
-BUILD_DIR     = build
-SRC_DIR       = src
-INCLUDE_DIR   = include
+LDFLAGS = $(CFLAGS)
+LDFLAGS += -lfl -ly
 
-SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c
+BUILD_DIR     = Build
+SRC_DIR       = Code
+INCLUDE_DIR   = Include
+
+SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/main.c
+SRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c $(TARGET_NAME)
 
 CFLAGS += -iquote./$(INCLUDE_DIR)
 
-.DEFAULT_GOAL = run
+.DEFAULT_GOAL = $(TARGET_NAME)
 .PHONY : run clean
 
 # generate dependency files
@@ -49,7 +53,7 @@ $(INCLUDE_DIR)/syntax.tab.h : $(SRC_DIR)/syntax.tab.c
 $(BUILD_DIR)/$(TARGET_NAME) : $(OBJS)
 	@mkdir -p $(dir $@)
 	@echo + [LD] $^
-	@$(LD) $(CFLAGS) -o $@ $^
+	@$(LD) $(LDFLAGS) -o $@ $^
 
 $(TARGET_NAME): $(BUILD_DIR)/$(TARGET_NAME)
 	@echo + [CP] $^

@@ -13,6 +13,8 @@ typedef struct cst_node {
     struct cst_node **child;
 } cst_node_t;
 
+cst_node_t *cst;
+
 static inline cst_node_t
 *cst_node_ctor(cmm_loc_t loc, int nr_child, const char *fmt, ...) {
     va_list args1, args2;

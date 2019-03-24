@@ -5,8 +5,6 @@
 #include "error.h"
 #include "cst.h"
 
-cst_node_t *cst;
-int yylex(void);
 void yyerror(const char*);
 
 #define BUILD_CST_NODE0($$, ...) { \
@@ -78,6 +76,7 @@ void yyerror(const char*);
 
 #define YYLTYPE cmm_loc_t;
 
+/* track current position */
 #define YYLLOC_DEFAULT(Cur, Rhs, N) {       \
     do {                                    \
         if (N) {                            \
@@ -177,7 +176,6 @@ ParamDec :
 
 CompSt : 
       '{' DefList StmtList '}'          { BUILD_CST_NODE4($$, $1, $2, $3, $4, "CompSt"); }
-    | '{' error '}'                     { BUILD_CST_NODE2($$, $1, $3, "CompSt (Error)"); }
     ;
 
 StmtList :                              
@@ -246,12 +244,6 @@ Args :
     ;
 
 %%
-
-int main() {
-    yyparse();
-    if (cmm_nr_error == 0) cst_node_print(cst, 0);
-    cst_node_dtor(cst);
-}
 
 void yyerror(char const *msg) {
     cmm_error(CMM_ERROR_SYNTAX, yylloc, msg);
