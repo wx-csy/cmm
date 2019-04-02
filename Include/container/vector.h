@@ -37,21 +37,6 @@
 #define vector_clear(vec)                                           \
     do {                                                            \
         typeof(vec) *this = &(vec);                                 \
-        if (this->_Tdtor) {                                         \
-            for (size_t i = this->size; i; i--)                     \
-                this->Tdtor(this->data[i - 1]);                     \
-        }                                                           \
-        this->size = 0;                                             \
-    } while (0)
-
-#define vector_clear(vec)                                           \
-    do {                                                            \
-        typeof(vec) *this = &(vec);                                 \
-        if (this->_Tdtor) {                                         \
-            for (size_t i = this->size; i; i--)                     \
-                this->Tdtor(this->data[i - 1]);                     \
-        }                                                           \
-        this.size = 0;                                              \
         free(this->data);                                           \
     } while (0)
 
