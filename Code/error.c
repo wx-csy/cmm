@@ -1,10 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include "cmm.h"
 #include "error.h"
 
-int cmm_nr_error = 0;
+size_t cmm_nr_error = 0;
 
 static const char *errmsg[1024] = {
     [CMM_ERROR_FILEERROR]   = "unable to open file '%s'",

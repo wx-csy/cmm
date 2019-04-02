@@ -1,9 +1,10 @@
 #ifndef __ERROR_H__
 #define __ERROR_H__
 
-#include "cmm.h"
+#include "common.h"
+#include "location.h"
 
-extern int cmm_nr_error;
+extern size_t cmm_nr_error;
 
 enum CMM_ERROR_NO {
     // system error
