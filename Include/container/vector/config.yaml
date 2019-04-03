@@ -1,12 +1,14 @@
 name : vector
 
+typename : [T]
+
 types :
     - [int]
-    - [double]
 
 functions :
-    push: 2
-    top: 1
-    pop: 1
-    free: 1
+    push:   2
+    back:   1
+    pop:    1
+    clear:  1
+    free:   1
 

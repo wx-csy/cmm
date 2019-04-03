@@ -3,22 +3,26 @@ import sys
 import yaml
 from mangle import *
 
-cfg = yaml.load(sys.stdin.read(), Loader=yaml.FullLoader)
+cfg = yaml.load(sys.stdin.read())
 name = cfg['name']
+tn = cfg['typename']
 types = cfg['types']
+
+print instancename_cdef(name, len(tn))
+print
 
 for tp in types :
     print '#include "container/{0}/{1}.inst.hh"'.format(name, mangle(tp))
 print
 
 for funcname, argc in cfg['functions'].items() :
-    arglist = ', '.join(['a' + str(aid) for aid in range(argc)])
     print '#define {0}_{1}'.format(name, funcname) + \
-        '(' + arglist + ') \\'
-    print '    _Generic((a0), \\'
+        '(' + ', '.join(['a' + str(aid) for aid in range(argc)]) + ') \\'
+    print '    _Generic((a0) \\'
     for tp in types :
-        print '        ' + tp + ': ' + \
-            '_{0}_{1}_{2}'.format(name, tp, funcname) + \
-            ', \\'
-    print '    )(' + arglist + ')'
+        print '        , struct ' + instancename(name, tp) + ': ' + \
+            '{0}_{1}'.format(instancename(name, tp), funcname) + \
+            ' \\'
+    print '    )(' + ', '.join([('&(' if aid == 0 else '(') + 'a' + str(aid) + ')' 
+        for aid in range(argc)]) + ')'
     print 

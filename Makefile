@@ -15,10 +15,11 @@ BUILD_DIR     = Build
 SRC_DIR       = Code
 INCLUDE_DIR   = Include
 
-SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/main.c
+SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/main.c $(SRC_DIR)/symtbl.c
 SRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
-GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c $(TARGET_NAME)
+GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c \
+    $(TARGET_NAME)
 
 CFLAGS += -iquote./$(INCLUDE_DIR)
 
