@@ -1,0 +1,10 @@
+name : vector
+
+types :
+    - int
+    - double
+
+functions :
+    push: 2
+    clear: 1
+

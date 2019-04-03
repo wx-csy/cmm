@@ -1,0 +1,23 @@
+BIN := ../bin
+
+.DEFAULT_GOAL := build
+.PHONY : build clean
+
+-include Makefile.dep
+
+Makefile.dep : $(BIN)/dep-gen.py config.yaml
+	@echo '[DEP]' $@
+	@$(BIN)/dep-gen.py < config.yaml > $@
+
+generic.hh : $(BIN)/generic-gen.py config.yaml
+	@echo '[GEN]' $@
+	@$(BIN)/generic-gen.py < config.yaml > $@
+
+%.inst.hh : impl.h
+	@echo '[SED]' instantiating "<$(patsubst %.inst.hh,%,$@)>" "($@)"
+	@sed -e "s/@(TYPENAME)/$(patsubst %.inst.hh,%,$@)/g" impl.h > $@ 
+
+build : header.h generic.hh $(INST_TARGETS)
+
+clean :
+	rm -f *.hh Makefile.dep

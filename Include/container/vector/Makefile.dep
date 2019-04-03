@@ -1,0 +1,5 @@
+INST_TARGETS = \
+    int.inst.hh \
+    double.inst.hh \
+
+

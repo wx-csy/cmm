@@ -5,7 +5,7 @@ LD      = gcc
 FLEX	= flex
 BISON	= bison
 
-CFLAGS  += -std=gnu99 -Wall -ggdb
+CFLAGS  += -std=gnu11 -Wall -ggdb
 # CFLAGS  += -fsanitize=undefined -fsanitize=address
 
 LDFLAGS = $(CFLAGS)

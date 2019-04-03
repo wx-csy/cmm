@@ -1,0 +1,12 @@
+name : vector
+
+types :
+    - [int]
+    - [double]
+
+functions :
+    push: 2
+    top: 1
+    pop: 1
+    free: 1
+
