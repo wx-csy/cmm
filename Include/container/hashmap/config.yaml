@@ -1,10 +1,14 @@
-name : vector
+name : hashmap
+
+typename : [TKey, TVal]
 
 types :
-    - int
-    - double
+    - [int]
 
 functions :
-    push: 2
-    clear: 1
+    push:   2
+    back:   1
+    pop:    1
+    clear:  1
+    free:   1
 

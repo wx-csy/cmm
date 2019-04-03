@@ -3,4 +3,6 @@
 
 #include "container/vector/generic.hh"
 
+#define vector_initializer { 0, 0, NULL }
+
 #endif

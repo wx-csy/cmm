@@ -20,7 +20,7 @@ for funcname, argc in cfg['functions'].items() :
         '(' + ', '.join(['a' + str(aid) for aid in range(argc)]) + ') \\'
     print '    _Generic((a0) \\'
     for tp in types :
-        print '        , struct ' + instancename(name, tp) + ': ' + \
+        print '        , struct ' + instancename(name, tp) + ' : ' + \
             '{0}_{1}'.format(instancename(name, tp), funcname) + \
             ' \\'
     print '    )(' + ', '.join([('&(' if aid == 0 else '(') + 'a' + str(aid) + ')' 
