@@ -22,6 +22,7 @@ GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.y
     $(TARGET_NAME)
 
 CFLAGS += -iquote./$(INCLUDE_DIR)
+CFLAGS += -I./$(INCLUDE_DIR)/container
 
 .DEFAULT_GOAL = $(TARGET_NAME)
 .PHONY : run clean

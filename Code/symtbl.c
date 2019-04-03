@@ -1,5 +1,6 @@
 #include "cmm.h"
 #include "symtbl.h"
-#include "container/vector.h"
+#include <vector.h>
+#include <hashmap.h>
 
 

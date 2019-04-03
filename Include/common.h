@@ -6,4 +6,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef char *charptr_t;
+typedef const char *ccharptr_t;
+
+static inline size_t strhash(const char* str) {
+    size_t ret = 55834;
+    while (*str) {
+        ret += (ret << 5) + (unsigned char)(*str);
+        str++;
+    }
+    return ret;
+}
+
 #endif

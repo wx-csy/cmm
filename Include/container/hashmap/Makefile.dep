@@ -1,9 +1,9 @@
 INST_TARGETS = \
-    T0_int.inst.hh \
+    T0_ccharptr_t_T1_int.inst.hh \
 
 
-T0_int.inst.hh : impl.h
-	@echo [GEN]  "<int>" "($@)"
-	@echo "#line 1" '"container/hashmap/impl.h"' > $@
-	@sed -e "s/@(TKey)/int/g" -e "s/@(MANGLE)/_hashmap_T0_int/g" $< >> $@
+T0_ccharptr_t_T1_int.inst.hh : impl.h
+	@echo [GEN]  "<ccharptr_t, int>" "($@)"
+	@echo "#line 1" '"Include/container/hashmap/impl.h"' > $@
+	@sed -e "s/@(TKey)/ccharptr_t/g" -e "s/@(TVal)/int/g" -e "s/@(MANGLE)/_hashmap_T0_ccharptr_t_T1_int/g" $< >> $@
 

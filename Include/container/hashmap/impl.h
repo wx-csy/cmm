@@ -4,14 +4,14 @@
 
 struct @(MANGLE) {
     size_t (*_hash)(@(TKey));
-    int (*_kcmp)(@(TKey), @(TKey));
+    bool (*_kcmp)(@(TKey), @(TKey));
     size_t _cap;
     size_t _used;
     size_t size;
     struct {
         int tag;
         @(TKey) key;
-        @(TValue) value;
+        @(TVal) value;
     } *_data;
 };
 
@@ -29,8 +29,8 @@ static inline size_t _@(MANGLE)_find(struct @(MANGLE) *this, @(TKey) key) {
         if (this->_data[ptr].tag == _HASHMAP_SLOT_EMPTY) 
             return ptr;
         if (this->_data[ptr].tag == _HASHMAP_SLOT_FILLED &&
-            this->_hash(this->_data[ptr].key, key) == 0)
-            return ptr
+            this->_kcmp(this->_data[ptr].key, key))
+            return ptr;
     }
 }
 
@@ -45,6 +45,8 @@ static inline void _@(MANGLE)_insert(struct @(MANGLE) *this, @(TKey) key, @(TVal
 
 static inline void _@(MANGLE)_rehash(struct @(MANGLE) *this, size_t newcap) {
     struct @(MANGLE) newmap;
+    newmap._hash = this->_hash;
+    newmap._kcmp = this->_kcmp;
     newmap._cap = newcap;
     newmap._used = 0;
     newmap.size = 0;
@@ -55,32 +57,49 @@ static inline void _@(MANGLE)_rehash(struct @(MANGLE) *this, size_t newcap) {
     }
     @(MANGLE)_foreach(this, insert_kvp);
     free(this->_data);
-    *this = newmap
+    *this = newmap;
 }
 
-static inline void @(MANGLE)_push(struct @(MANGLE) *this, @(T) elem) {
-    if (this->size == this->_cap) {
-        this->_cap += this->_cap;
-        this->data = realloc(this->data, this->_cap * sizeof(@(T)));
-    }
-    this->data[this->size ++] = elem;
-}
-
-static inline @(T) @(MANGLE)_back(struct @(MANGLE) *this) {
-    return this->data[this->size - 1];
-}
-
-static inline void @(MANGLE)_pop(struct @(MANGLE) *this) {
-    this->size --;
-}
-
-static inline void @(MANGLE)_clear(struct @(MANGLE) *this) {
+static inline void 
+@(MANGLE)_init(struct @(MANGLE) *this, size_t (*hash)(@(TKey)), bool (*kcmp)(@(TKey), @(TKey))) {
+    this->_hash = hash;
+    this->_kcmp = kcmp;
+    this->_cap = 16;
+    this->_used = 0;
     this->size = 0;
+    this->_data = calloc(this->_cap, sizeof(*this->_data));
+}
+
+static inline bool @(MANGLE)_exist(struct @(MANGLE) *this, @(TKey) key) {
+    size_t pos = _@(MANGLE)_find(this, key);
+    return this->_data[pos].tag == _HASHMAP_SLOT_FILLED;
+}
+
+static inline @(TVal) @(MANGLE)_get(struct @(MANGLE) *this, @(TKey) key) {
+    size_t pos = _@(MANGLE)_find(this, key);
+    return this->_data[pos].value;
+}
+
+static inline void @(MANGLE)_insert(struct @(MANGLE) *this, @(TKey) key, @(TVal) value) {
+    if (this->_used + (this->_used >> 1) >= this->_cap || (this->size << 1) >= this->_cap) {
+        size_t newsize = this->_cap;
+        if ((this->size << 1) >= this->_cap) newsize += this->_cap;
+        _@(MANGLE)_rehash(this, newsize);
+    }
+    _@(MANGLE)_insert(this, key, value);
+}
+
+static inline void @(MANGLE)_erase(struct @(MANGLE) *this, @(TKey) key) {
+    size_t pos = _@(MANGLE)_find(this, key);
+    if (this->_data[pos].tag == _HASHMAP_SLOT_FILLED) {
+        this->_data[pos].tag = _HASHMAP_SLOT_DELETED;
+        this->size --;
+    }
 }
 
 static inline void @(MANGLE)_free(struct @(MANGLE) *this) {
-    free(this->data);
-    this->size = this->_cap = 0;
-    this->data = NULL;
+    free(this->_data);
+    this->size = this->_cap = this->_used = 0;
+    this->_data = NULL;
 }
 

@@ -12,7 +12,7 @@ print instancename_cdef(name, len(tn))
 print
 
 for tp in types :
-    print '#include "container/{0}/{1}.inst.hh"'.format(name, mangle(tp))
+    print '#include "{0}.inst.hh"'.format(mangle(tp))
 print
 
 for funcname, argc in cfg['functions'].items() :
