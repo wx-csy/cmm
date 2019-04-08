@@ -6,7 +6,7 @@ FLEX	= flex
 BISON	= bison
 
 CFLAGS  += -std=gnu11 -Wall -ggdb
-# CFLAGS  += -fsanitize=undefined -fsanitize=address
+CFLAGS  += -fsanitize=undefined -fsanitize=address
 
 LDFLAGS = $(CFLAGS)
 LDFLAGS += -lfl -ly
@@ -15,9 +15,9 @@ BUILD_DIR     = Build
 SRC_DIR       = Code
 INCLUDE_DIR   = Include
 
-SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/main.c $(SRC_DIR)/symtbl.c
-SRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+CSRCS = $(SRC_DIR)/error.c $(SRC_DIR)/symtbl.c
+CSRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/main.c
+COBJS = $(CSRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c \
     $(TARGET_NAME)
 
@@ -32,7 +32,7 @@ $(BUILD_DIR)/%.d : $(SRC_DIR)/%.c
 	@echo + [DEP] $@
 	@$(CC) $(CFLAGS) -M -MMD -o $@ $<
 
--include $(OBJS:.o=.d)
+-include $(COBJS:.o=.d)
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
@@ -51,7 +51,7 @@ $(SRC_DIR)/syntax.tab.c : $(SRC_DIR)/syntax.y
 
 $(INCLUDE_DIR)/syntax.tab.h : $(SRC_DIR)/syntax.tab.c
 
-$(BUILD_DIR)/$(TARGET_NAME) : $(OBJS)
+$(BUILD_DIR)/$(TARGET_NAME) : $(COBJS)
 	@mkdir -p $(dir $@)
 	@echo + [LD] $^
 	@$(LD) $(LDFLAGS) -o $@ $^

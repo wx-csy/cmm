@@ -19,13 +19,13 @@ static inline cst_node_t
 *cst_node_ctor(cmm_loc_t loc, int nr_child, const char *fmt, ...) {
     va_list args1, args2;
     va_start(args1, fmt); va_copy(args2, args1);
-    cst_node_t *ret = malloc(sizeof(cst_node_t));
+    cst_node_t *ret = (cst_node_t *)malloc(sizeof(cst_node_t));
     ret->loc = loc;
-    ret->buf = malloc(1 + vsnprintf(NULL, 0, fmt, args1));
+    ret->buf = (char *)malloc(1 + vsnprintf(NULL, 0, fmt, args1));
     vsprintf(ret->buf, fmt, args2);
 //    printf("[CST_NODE] %s\n", ret->buf);
     ret->nr_child = nr_child;
-    ret->child = calloc(nr_child, sizeof(cst_node_t *));
+    ret->child = (struct cst_node **)calloc(nr_child, sizeof(cst_node_t *));
     va_end(args1); va_end(args2);
     return ret;
 }

@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.6)
+project(cmm)
+include_directories(Include)
+file(GLOB SRC_FILES Code/*.c Code/ast/*.c)
+add_executable(parse ${SRC_FILES})

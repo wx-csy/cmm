@@ -1,0 +1,3 @@
+/home/sy_chen/Desktop/cmm/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/sy_chen/Desktop/cmm/cmake-build-debug/CMakeFiles/parse.dir
+/home/sy_chen/Desktop/cmm/cmake-build-debug/CMakeFiles/edit_cache.dir
