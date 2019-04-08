@@ -63,7 +63,7 @@ typedef struct Expression {
                 size_t memberid;
             };
         };
-        struct Literal __ref *lit;
+        struct Literal lit;
     };
 } Expression;
 
@@ -92,7 +92,7 @@ Expression *
 Variable_Expression_Constructor(cmm_loc_t location, Variable *var);
 
 Expression *
-Literal_Expression_Constructor(cmm_loc_t location, Literal *lit);
+Literal_Expression_Constructor(cmm_loc_t location, Literal lit);
 
 void Expression_Destructor(Expression *expr);
 

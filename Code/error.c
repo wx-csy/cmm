@@ -35,3 +35,4 @@ void cmm_error(int cmm_errno, cmm_loc_t loc, ...) {
     va_end(ap);
     fprintf(stderr, "\n");
 }
+

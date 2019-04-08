@@ -7,73 +7,6 @@
 
 void yyerror(const char*);
 
-#define BUILD_CST_NODE0($$, ...) { \
-        $$ = NULL; \
-    }
-
-#define BUILD_CST_NODE1($$, $1, fmt, ...) { \
-        $$ = cst_node_ctor(yylloc, 1, fmt " (%d)", ##__VA_ARGS__, \
-            yylloc.line); \
-        $$->child[0] = $1; \
-    }
-
-#define BUILD_CST_NODE2($$, $1, $2, fmt, ...) { \
-        $$ = cst_node_ctor(yylloc, 2, fmt " (%d)", ##__VA_ARGS__, \
-            yylloc.line); \
-        $$->child[0] = $1; \
-        $$->child[1] = $2; \
-    }
-
-#define BUILD_CST_NODE3($$, $1, $2, $3, fmt, ...) { \
-        $$ = cst_node_ctor(yylloc, 3, fmt " (%d)", ##__VA_ARGS__, \
-            yylloc.line); \
-        $$->child[0] = $1; \
-        $$->child[1] = $2; \
-        $$->child[2] = $3; \
-    }
-    
-#define BUILD_CST_NODE4($$, $1, $2, $3, $4, fmt, ...) { \
-        $$ = cst_node_ctor(yylloc, 4, fmt " (%d)", ##__VA_ARGS__, \
-            yylloc.line); \
-        $$->child[0] = $1; \
-        $$->child[1] = $2; \
-        $$->child[2] = $3; \
-        $$->child[3] = $4; \
-    }
-
-#define BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, fmt, ...) { \
-        $$ = cst_node_ctor(yylloc, 5, fmt " (%d)", ##__VA_ARGS__, \
-            yylloc.line); \
-        $$->child[0] = $1; \
-        $$->child[1] = $2; \
-        $$->child[2] = $3; \
-        $$->child[3] = $4; \
-        $$->child[4] = $5; \
-    }
-    
-#define BUILD_CST_NODE6($$, $1, $2, $3, $4, $5, $6, fmt, ...) { \
-        $$ = cst_node_ctor(yylloc, 6, fmt " (%d)", ##__VA_ARGS__, \
-            yylloc.line); \
-        $$->child[0] = $1; \
-        $$->child[1] = $2; \
-        $$->child[2] = $3; \
-        $$->child[3] = $4; \
-        $$->child[4] = $5; \
-        $$->child[5] = $6; \
-    }
-    
-#define BUILD_CST_NODE7($$, $1, $2, $3, $4, $5, $6, $7, fmt, ...) { \
-        $$ = cst_node_ctor(yylloc, 7, fmt " (%d)", ##__VA_ARGS__, \
-            yylloc.line); \
-        $$->child[0] = $1; \
-        $$->child[1] = $2; \
-        $$->child[2] = $3; \
-        $$->child[3] = $4; \
-        $$->child[4] = $5; \
-        $$->child[5] = $6; \
-        $$->child[6] = $7; \
-    }
-
 #define YYLTYPE cmm_loc_t;
 
 /* track current position */
@@ -87,9 +20,16 @@ void yyerror(const char*);
     while (0)
 %}
 
-%define api.value.type {cst_node_t *}
+%union {
+    enum ExprType exprtype;
+    struct Expression *expr;    
+    struct Statement *stmt;
+    ArgList arglist;
+    ArgList sublist;
+    Literal lit;
+}
+
 %define parse.error verbose
-%destructor { cst_node_dtor($$); } <>
 %start  Program
 %token  INT FLOAT ID TYPE
 %token  IF WHILE RETURN STRUCT 
@@ -175,23 +115,43 @@ ParamDec :
 // Statements
 
 CompSt : 
-      '{' DefList StmtList '}'          { BUILD_CST_NODE4($$, $1, $2, $3, $4, "CompSt"); }
+      '{' DefList StmtList '}'          { 
+          $$ = Compound_Expression_Constructor(yylloc, $DefList, $StmtList);
+        }
     ;
 
 StmtList :                              
-      Stmt StmtList                     { BUILD_CST_NODE2($$, $1, $2, "StmtList"); }
-    | %empty                            { BUILD_CST_NODE0($$, "StmtList"); }
+      Stmt StmtList                     { 
+            $$ = $StmtList;
+            array_append($$.stmts, $$.nr_stmt, $Stmt);
+        }
+    | %empty                            { 
+            memset($$, 0, sizeof(*$$))
+        }
     ;
 
 Stmt : 
-      Exp ';'                           { BUILD_CST_NODE2($$, $1, $2, "Stmt"); }
-    | error ';'                         { BUILD_CST_NODE1($$, $2, "Stmt (Error)"); }
-    | CompSt                            { BUILD_CST_NODE1($$, $1, "Stmt"); }
-    | RETURN Exp ';'                    { BUILD_CST_NODE3($$, $1, $2, $3, "Stmt"); }
-    | IF '(' Exp ')' Stmt %prec LOWER_THAN_ELSE
-                                        { BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, "Stmt"); }
-    | IF '(' Exp ')' Stmt ELSE Stmt     { BUILD_CST_NODE7($$, $1, $2, $3, $4, $5, $6, $7, "Stmt"); }
-    | WHILE '(' Exp ')' Stmt            { BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, "Stmt"); }
+      Exp ';'                           { 
+            $$ = Expression_Statement_Constructor(yylloc, $Exp);
+        }
+    | error ';'                         {
+            $$ = NULL;  /* TODO: better error handling */
+        }
+    | CompSt                            { 
+            $$ = $CompSt;
+        }
+    | RETURN Exp ';'                    { 
+            $$ = Return_Statement_Constructor(yylloc, $Exp);
+        }
+    | IF '(' Exp ')' Stmt %prec LOWER_THAN_ELSE     { 
+            $$ = IfThen_Statement_Constructor(yylloc, $Exp, $Stmt);
+        }
+    | IF '(' Exp ')' Stmt[s1] ELSE Stmt[s2]         { 
+            $$ = IfThenElse_Statement_Constructor(yylloc, $Exp, $s1, $s2);
+        }
+    | WHILE '(' Exp ')' Stmt            { 
+            $$ = While_Statement_Constructor(yylloc, $Exp, $Stmt);
+        }
     ;
 
 // Local Definitions
@@ -218,29 +178,71 @@ Dec :
 // Expressions
 
 Exp :
-      Exp '=' Exp                       { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp AND Exp                       { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp OR Exp                        { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp RELOP Exp                     { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp '+' Exp                       { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp '-' Exp                       { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp '*' Exp                       { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp '/' Exp                       { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | '(' Exp ')'                       { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | '-' Exp   %prec UMINUS            { BUILD_CST_NODE2($$, $1, $2, "Exp"); }
-    | '!' Exp   %prec UMINUS            { BUILD_CST_NODE2($$, $1, $2, "Exp"); }
-    | ID '(' Args ')'                   { BUILD_CST_NODE4($$, $1, $2, $3, $4, "Exp"); }
-    | ID '(' ')'                        { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | Exp '[' Exp ']'                   { BUILD_CST_NODE4($$, $1, $2, $3, $4, "Exp"); }
-    | Exp '.' ID                        { BUILD_CST_NODE3($$, $1, $2, $3, "Exp"); }
-    | ID                                { BUILD_CST_NODE1($$, $1, "Exp"); }
-    | INT                               { BUILD_CST_NODE1($$, $1, "Exp"); }
-    | FLOAT                             { BUILD_CST_NODE1($$, $1, "Exp"); }
+      Exp '=' Exp                       {
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | Exp AND Exp                       {
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | Exp OR Exp                        {
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | Exp RELOP Exp                     {
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | Exp '+' Exp                       {
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | Exp '-' Exp                       {
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | Exp '*' Exp                       {
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | Exp '/' Exp                       { 
+            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+        }
+    | '(' Exp ')'                       { 
+            $$ = $Exp;
+        }
+    | '-' Exp   %prec UMINUS            { 
+            $$ = Unary_Expression_Constructor($1, yylloc, $Exp);
+        }
+    | '!' Exp   %prec UMINUS            { 
+            $$ = Unary_Expression_Constructor($1, yylloc, $Exp);
+        }
+    | ID '(' Args ')'                   { 
+            /* TODO: symtbl lookup */
+        }
+    | ID '(' ')'                        { 
+            /* TODO: symtbl lookup */
+        }
+    | Exp '[' Exp ']'                   { 
+            /* TODO: array access */
+        }
+    | Exp '.' ID                        { 
+            /* TODO: symtbl lookup */
+        }
+    | ID                                { 
+            /* TODO: symtbl lookup */
+        }
+    | INT                               { 
+            $$ = Literal_Expression_Constructor(yylloc, $FLOAT);
+        }
+    | FLOAT                             { 
+            $$ = Literal_Expression_Constructor(yylloc, $FLOAT);
+        }
     ;
 
 Args : 
-      Exp ',' Args                      { BUILD_CST_NODE3($$, $1, $2, $3, "Args"); }
-    | Exp                               { BUILD_CST_NODE1($$, $1, "Args"); }
+      Exp ',' Args                      { 
+            $$ = $Args;
+            array_append($$.args, $$.nr_arg, $Exp);
+        }
+    | Exp                               { 
+            memset($$, 0, sizeof(*$$));
+            array_append($$.args, $$.nr_arg, $Exp);
+        }
     ;
 
 %%

@@ -46,7 +46,7 @@ typedef struct Statement {
 } Statement;
 
 Statement *
-Compound_Expression_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist)
+Compound_Statement_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist)
 
 Statement *
 Expression_Statement_Constructor(cmm_loc_t location, Expression *expr);

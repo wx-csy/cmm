@@ -67,7 +67,7 @@ Variable_Expression_Constructor(cmm_loc_t location, Variable *var) {
 }
 
 Expression *
-Literal_Expression_Constructor(cmm_loc_t location, Literal *lit) {
+Literal_Expression_Constructor(cmm_loc_t location, Literal lit) {
     Expression *ret = malloc(sizeof(Expression));
     ret->type = EXPR_LITERAL;
     ret->location = location;
