@@ -5,6 +5,7 @@
 #define _HASHMAP_SLOT_FILLED    1
 #define _HASHMAP_SLOT_DELETED   2
 
-#include "container/hashmap/generic.hh"
+#include "common.h"
+#include "hashmap/generic.hh"
 
 #endif

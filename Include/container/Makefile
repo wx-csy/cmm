@@ -1,4 +1,4 @@
-TARGETS = vector 
+TARGETS = vector hashmap
 
 .DEFAULT_GOAL := build
 .PHONY : build .FORCE

@@ -3,12 +3,13 @@ name : hashmap
 typename : [TKey, TVal]
 
 types :
-    - [int]
+    - [ccharptr_t, int]
 
 functions :
-    push:   2
-    back:   1
-    pop:    1
-    clear:  1
-    free:   1
+    for_each:   2
+    init:       3
+    exist:      2
+    insert:     3
+    erase:      2
+    free:       1
 

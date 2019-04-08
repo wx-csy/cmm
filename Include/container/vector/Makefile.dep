@@ -4,6 +4,6 @@ INST_TARGETS = \
 
 T0_int.inst.hh : impl.h
 	@echo [GEN]  "<int>" "($@)"
-	@echo "#line 1" '"container/vector/impl.h"' > $@
+	@echo "#line 1" '"Include/container/vector/impl.h"' > $@
 	@sed -e "s/@(T)/int/g" -e "s/@(MANGLE)/_vector_T0_int/g" $< >> $@
 
