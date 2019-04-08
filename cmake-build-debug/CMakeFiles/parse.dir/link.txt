@@ -1,1 +1,0 @@
-/usr/bin/cc -g   CMakeFiles/parse.dir/Code/error.c.o CMakeFiles/parse.dir/Code/lex.yy.c.o CMakeFiles/parse.dir/Code/main.c.o CMakeFiles/parse.dir/Code/symtbl.c.o CMakeFiles/parse.dir/Code/syntax.tab.c.o  -o parse 
