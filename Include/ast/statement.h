@@ -46,24 +46,22 @@ typedef struct Statement {
 } Statement;
 
 Statement *
-Compound_Statement_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist)
+Statement_Compound_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist)
 
 Statement *
-Expression_Statement_Constructor(cmm_loc_t location, Expression *expr);
+Statement_Expression_Constructor(cmm_loc_t location, Expression *expr);
 
 Statement *
-Return_Statement_Constructor(cmm_loc_t location, Expression *expr);
+Statement_Return_Constructor(cmm_loc_t location, Expression *expr);
 
 Statement *
-IfThen_Statement_Constructor(cmm_loc_t location, Expression *if_cond, Statement *stat_if_true);
+Statement_IfThen_Constructor(cmm_loc_t location, Expression *if_cond, Statement *stat_if_true);
 
 Statement *
-IfThenElse_Statement_Constructor(cmm_loc_t location,
+Statement_IfThenElse_Constructor(cmm_loc_t location,
                                  Expression *if_cond, Statement *stat_if_true, Statement *stat_if_false);
 
 Statement *
-While_Statement_Constructor(cmm_loc_t location, Expression *while_cond, Statement *while_body);
-
-void Statement_Destructor(Statement *stmt);
+Statement_While_Constructor(cmm_loc_t location, Expression *while_cond, Statement *while_body);
 
 #endif

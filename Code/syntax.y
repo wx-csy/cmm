@@ -19,13 +19,11 @@ void yyerror(const char*);
         }                                   \
     while (0)
 %}
-
+h
 %union {
-    enum ExprType exprtype;
     struct Expression *expr;    
     struct Statement *stmt;
     ArgList arglist;
-    ArgList sublist;
     Literal lit;
 }
 
@@ -116,7 +114,7 @@ ParamDec :
 
 CompSt : 
       '{' DefList StmtList '}'          { 
-          $$ = Compound_Expression_Constructor(yylloc, $DefList, $StmtList);
+          $$ = Statement_Compound_Constructor(yylloc, $DefList, $StmtList);
         }
     ;
 
@@ -132,7 +130,7 @@ StmtList :
 
 Stmt : 
       Exp ';'                           { 
-            $$ = Expression_Statement_Constructor(yylloc, $Exp);
+            $$ = Statement_Expression_Constructor(yylloc, $Exp);
         }
     | error ';'                         {
             $$ = NULL;  /* TODO: better error handling */
@@ -141,16 +139,16 @@ Stmt :
             $$ = $CompSt;
         }
     | RETURN Exp ';'                    { 
-            $$ = Return_Statement_Constructor(yylloc, $Exp);
+            $$ = Statement_Return_Constructor(yylloc, $Exp);
         }
     | IF '(' Exp ')' Stmt %prec LOWER_THAN_ELSE     { 
-            $$ = IfThen_Statement_Constructor(yylloc, $Exp, $Stmt);
+            $$ = Statement_IfThen_Constructor(yylloc, $Exp, $Stmt);
         }
     | IF '(' Exp ')' Stmt[s1] ELSE Stmt[s2]         { 
-            $$ = IfThenElse_Statement_Constructor(yylloc, $Exp, $s1, $s2);
+            $$ = Statement_IfThenElse_Constructor(yylloc, $Exp, $s1, $s2);
         }
     | WHILE '(' Exp ')' Stmt            { 
-            $$ = While_Statement_Constructor(yylloc, $Exp, $Stmt);
+            $$ = Statement_While_Constructor(yylloc, $Exp, $Stmt);
         }
     ;
 
@@ -179,37 +177,37 @@ Dec :
 
 Exp :
       Exp '=' Exp                       {
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Assign_Constructor(yylloc, $1, $3);
         }
     | Exp AND Exp                       {
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Binary_Constructor(EXPR_BINARY_AND, yylloc, $1, $3);
         }
     | Exp OR Exp                        {
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Binary_Constructor(EXPR_BINARY_OR, yylloc, $1, $3);
         }
     | Exp RELOP Exp                     {
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Binary_Constructor($2, yylloc, $1, $3);
         }
     | Exp '+' Exp                       {
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Binary_Constructor(EXPR_BINARY_ADD, yylloc, $1, $3);
         }
     | Exp '-' Exp                       {
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Binary_Constructor(EXPR_BINARY_MINUS, yylloc, $1, $3);
         }
     | Exp '*' Exp                       {
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Binary_Constructor(EXPR_BINARY_STAR, yylloc, $1, $3);
         }
     | Exp '/' Exp                       { 
-            $$ = Binary_Expression_Constructor($2, yylloc, $1, $3);  
+            $$ = Expression_Binary_Constructor(EXPR_BINARY_DIV, yylloc, $1, $3);
         }
     | '(' Exp ')'                       { 
             $$ = $Exp;
         }
     | '-' Exp   %prec UMINUS            { 
-            $$ = Unary_Expression_Constructor($1, yylloc, $Exp);
+            $$ = Expression_Unary_Constructor(EXPR_UNARY_NEGATE, yylloc, $Exp);
         }
     | '!' Exp   %prec UMINUS            { 
-            $$ = Unary_Expression_Constructor($1, yylloc, $Exp);
+            $$ = Expression_Unary_Constructor(EXPR_UNARY_NOT, yylloc, $Exp);
         }
     | ID '(' Args ')'                   { 
             /* TODO: symtbl lookup */
@@ -218,7 +216,7 @@ Exp :
             /* TODO: symtbl lookup */
         }
     | Exp '[' Exp ']'                   { 
-            /* TODO: array access */
+            $$ = Expression_ArrayAccess_Constructor(yylloc, $1, $3);
         }
     | Exp '.' ID                        { 
             /* TODO: symtbl lookup */

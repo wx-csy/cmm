@@ -1,11 +1,16 @@
 #include "cmm.h"
 #include "ast/expression.h"
 
+#define _EXPR_BINARY_BEGIN      EXPR_BINARY_ADD
+#define _EXPR_BINARY_END        EXPR_BINARY_OR
+#define _EXPR_UNARY_BEGIN       EXPR_UNARY_NEGATE
+#define _EXPR_UNARY_END         EXPR_UNARY_NOT
+
 Expression *
-Binary_Expression_Constructor(enum ExprType type, cmm_loc_t location, 
+Expression_Binary_Constructor(enum ExprType type, cmm_loc_t location,
 Expression *lhs, Expression *rhs) {
     assert(type >= _EXPR_UNARY_BEGIN && type <= _EXPR_UNARY_END);
-    Expression *ret = malloc(sizeof(Expression));
+    Expression *ret = palloc(sizeof(Expression));
     ret->type = type;
     ret->location = location;
     ret->lhs = lhs;
@@ -14,10 +19,10 @@ Expression *lhs, Expression *rhs) {
 }
 
 Expression *
-Unary_Expression_Constructor(enum ExprType type, cmm_loc_t location,
+Expression_Unary_Constructor(enum ExprType type, cmm_loc_t location,
 Expression *rhs) {
     assert(type >= _EXPR_UNARY_BEGIN && type <= _EXPR_UNARY_END);
-    Expression *ret = malloc(sizeof(Expression));
+    Expression *ret = palloc(sizeof(Expression));
     ret->type = type;
     ret->location = location;
     ret->rhs = rhs;
@@ -25,9 +30,9 @@ Expression *rhs) {
 }
 
 Expression *
-Assign_Expression_Constructor(cmm_loc_t location, 
+Expression_Assign_Constructor(cmm_loc_t location,
 Expression *lhs, Expression *rhs) {
-    Expression *ret = malloc(sizeof(Expression));
+    Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_ASSIGN;
     ret->location = location;
     ret->lhs = lhs;
@@ -36,9 +41,9 @@ Expression *lhs, Expression *rhs) {
 }
 
 Expression *
-FuncCall_Expression_Constructor(cmm_loc_t location, 
+Expression_FuncCall_Constructor(cmm_loc_t location,
 Function *func, Expression *rhs) {
-    Expression *ret = malloc(sizeof(Expression));
+    Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_FUNCCALL;
     ret->location = location;
     ret->func = func;
@@ -47,60 +52,30 @@ Function *func, Expression *rhs) {
 }
 
 Expression *
-ArrayAccess_Expression_Constructor(cmm_loc_t location, 
-Variable *var, SubList sublist) {
-    Expression *ret = malloc(sizeof(Expression));
+Expression_ArrayAccess_Constructor(cmm_loc_t location,
+Expression *arr, Expression *subscript) {
+    Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_ARRAYACCESS;
     ret->location = location;
-    ret->var = var;
-    ret->sublist = sublist; 
+    ret->arr = arr;
+    ret->subscript = subscript;
     return ret;
 }
 
 Expression *
-Variable_Expression_Constructor(cmm_loc_t location, Variable *var) {
-    Expression *ret = malloc(sizeof(Expression));
-    ret->type = EXPR_VARAIBLE;
+Expression_Variable_Constructor(cmm_loc_t location, Variable *var) {
+    Expression *ret = palloc(sizeof(Expression));
+    ret->type = EXPR_VARIABLE;
     ret->location = location;
     ret->var = var;
     return ret;
 }
 
 Expression *
-Literal_Expression_Constructor(cmm_loc_t location, Literal lit) {
-    Expression *ret = malloc(sizeof(Expression));
+Expression_Literal_Constructor(cmm_loc_t location, Literal lit) {
+    Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_LITERAL;
     ret->location = location;
     ret->lit = lit;
     return ret;
-}
-
-void Expression_Destructor(Expression *expr) {
-    if (expr == NULL) return;
-    switch (expr->type) {
-        case _EXPR_BINARY_BEGIN ... _EXPR_BINARY_END :
-            Expression_Destructor(expr->lhs);
-            Expression_Destructor(expr->rhs);
-            break;
-        case _EXPR_UNARY_BEGIN ... _EXPR_UNARY_END :
-            Expression_Destructor(expr->rhs);
-            break;
-        case EXPR_ASSIGN :
-            Expression_Destructor(expr->lhs);
-            Expression_Destructor(expr->rhs);
-            break;
-        case EXPR_FUNCCALL :
-            for (size_t i = 0; i < expr->arglist.nr_arg; i++)
-                Expression_Destructor(expr->arglist.args[i]);
-            free(expr->arglist.args);
-            break;
-        case EXPR_ARRAYACCESS :
-            for (size_t i = 0; i < expr->sublist.nr_arg; i++)
-                Expression_Destructor(expr->sublist.args[i]);
-            free(expr->arglist.args);
-            break;
-        default :
-            assert(0);
-    }
-    free(expr);
 }

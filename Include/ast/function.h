@@ -4,10 +4,15 @@
 #include "ast/ast.h"
 #include "location.h"
 
+typedef struct ParamList {
+    size_t nr_param;
+    Variable **params;
+} ParamList;
+
 typedef struct Function {
     const char *name;
     cmm_loc_t location;
-    struct VarList paramlist;
+    ParamList paramlist;
     Statement *stmt;
 } function;
 

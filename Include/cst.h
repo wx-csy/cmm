@@ -1,3 +1,6 @@
+/*
+ * This file is intended for debugging the parser.
+ */
 #ifndef __CST_H__
 #define __CST_H__
 

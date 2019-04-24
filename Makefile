@@ -15,9 +15,9 @@ BUILD_DIR     = Build
 SRC_DIR       = Code
 INCLUDE_DIR   = Include
 
-CSRCS = $(SRC_DIR)/error.c $(SRC_DIR)/symtbl.c
-CSRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/main.c
-COBJS = $(CSRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/symtbl.c
+SRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/main.c
+OBJS = $(CSRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c \
     $(TARGET_NAME)
 

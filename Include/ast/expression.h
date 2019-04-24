@@ -2,6 +2,7 @@
 #define __AST_EXPRESSION_H__
 
 #include "ast/ast.h"
+#include "ast/type.h"
 #include "location.h"
 
 typedef enum ExprType {
@@ -26,10 +27,6 @@ typedef enum ExprType {
     EXPR_LITERAL
 } ExprType;
 
-#define _EXPR_BINARY_BEGIN      EXPR_BINARY_ADD
-#define _EXPR_BINARY_END        EXPR_BINARY_OR
-#define _EXPR_UNARY_BEGIN       EXPR_UNARY_NEGATE
-#define _EXPR_UNARY_END         EXPR_UNARY_NOT
 
 typedef struct ArgList {
     size_t nr_arg;
@@ -37,8 +34,8 @@ typedef struct ArgList {
 } ArgList;
 
 typedef struct Expression {
-    enum ExprType exprtype;
-    Type __ref *type;
+    enum ExprType type;
+    Type *valtype;
     cmm_loc_t location;
 
     union {
@@ -50,17 +47,20 @@ typedef struct Expression {
         };
         /* function call */
         struct {
-            struct Function __ref *func;
+            struct Function *func;
             struct ArgList arglist;
         };
         struct {
             /* variable expression */
-            struct Variable __ref *var;
+            struct Variable *var;
+            /* member access */
+            size_t memberid;
+        };
+        struct {
             union {
                 /* array access */
-                struct ArgList sublist;
-                /* member access */
-                size_t memberid;
+                struct Expression *arr;
+                struct Expression *subscript;
             };
         };
         struct Literal lit;
@@ -68,32 +68,29 @@ typedef struct Expression {
 } Expression;
 
 Expression *
-Binary_Expression_Constructor(enum ExprType type, cmm_loc_t location,
+Expression_Binary_Constructor(enum ExprType type, cmm_loc_t location,
                               Expression *lhs, Expression *rhs);
 
 Expression *
-Unary_Expression_Constructor(enum ExprType type, cmm_loc_t location,
+Expression_Unary_Constructor(enum ExprType type, cmm_loc_t location,
                              Expression *rhs);
 
 Expression *
-Assign_Expression_Constructor(cmm_loc_t location,
+Expression_Assign_Constructor(cmm_loc_t location,
                               Expression *lhs, Expression *rhs);
 
 Expression *
-FuncCall_Expression_Constructor(cmm_loc_t location,
+Expression_FuncCall_Constructor(cmm_loc_t location,
                                 Function *func, Expression *rhs);
 
 Expression *
-ArrayAccess_Expression_Constructor(cmm_loc_t location,
-                                   Variable *var, SubList sublist);
-
-
-Expression *
-Variable_Expression_Constructor(cmm_loc_t location, Variable *var);
+Expression_ArrayAccess_Constructor(cmm_loc_t location,
+                                   Expression *arr, Expression *subscript);
 
 Expression *
-Literal_Expression_Constructor(cmm_loc_t location, Literal lit);
+Expression_Variable_Constructor(cmm_loc_t location, Variable *var);
 
-void Expression_Destructor(Expression *expr);
+Expression *
+Expression_Literal_Constructor(cmm_loc_t location, Literal lit);
 
 #endif

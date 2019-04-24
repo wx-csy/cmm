@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "utility.h"
-#include "oop.h"
 
 typedef char *charptr_t;
 typedef const char *ccharptr_t;
