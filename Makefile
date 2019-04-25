@@ -17,7 +17,7 @@ INCLUDE_DIR   = Include
 
 SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/symtbl.c
 SRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/main.c
-OBJS = $(CSRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c \
     $(TARGET_NAME)
 
@@ -40,7 +40,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 	@echo + [CC] $@
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
-$(SRC_DIR)/lex.yy.c : $(SRC_DIR)/lexical.l
+$(SRC_DIR)/lex.yy.c : $(SRC_DIR)/lexical.l $(INCLUDE_DIR)/syntax.tab.h
 	@mkdir -p $(dir $@)
 	@echo + [FLEX] $@
 	@$(FLEX) -o $@ $<
@@ -52,7 +52,7 @@ $(SRC_DIR)/syntax.tab.c : $(SRC_DIR)/syntax.y
 
 $(INCLUDE_DIR)/syntax.tab.h : $(SRC_DIR)/syntax.tab.c
 
-$(BUILD_DIR)/$(TARGET_NAME) : $(COBJS)
+$(BUILD_DIR)/$(TARGET_NAME) : $(OBJS)
 	@mkdir -p $(dir $@)
 	@echo + [LD] $^
 	@$(LD) $(LDFLAGS) -o $@ $^

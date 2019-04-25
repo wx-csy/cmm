@@ -39,6 +39,17 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 1 "Code/syntax.y" /* yacc.c:1909  */
+
+    #include "ast/ast.h"
+    #include "ast/expression.h"
+    #include "ast/statement.h"
+    #include "ast/variable.h"
+    #include "ast/function.h"
+    #include "ast/type.h"
+
+#line 53 "Include/syntax.tab.h" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -64,7 +75,34 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef cst_node_t * YYSTYPE;
+
+union YYSTYPE
+{
+#line 34 "Code/syntax.y" /* yacc.c:1909  */
+
+    int int_val;
+    float float_val;
+    const char *name;
+    enum BasicType basictype;
+    enum UnaryOperator unaryop;
+    struct Expression *expr;    
+    struct Statement *stmt;
+    StmtList stmtlist;
+    struct Type *type;
+    struct {
+         struct Variable *var;
+         struct Type **underlying;
+    } vardec;
+    struct Variable *var;
+    VarList varlist;
+    struct Function *func;
+    ArgList arglist;
+    int dummy;
+
+#line 103 "Include/syntax.tab.h" /* yacc.c:1909  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

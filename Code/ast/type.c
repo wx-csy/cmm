@@ -1,11 +1,7 @@
-//
-// Created by sy_chen on 4/24/19.
-//
-
 #include "cmm.h"
 #include "ast/type.h"
 
-static Type __basic_type[256] = {
+static Type basic_type[256] = {
     [BT_INT] = {
         .typector = TC_BASIC,
         .width = 4,
@@ -33,7 +29,7 @@ bool Type_Compatible(Type *type1, Type *type2) {
 }
 
 Type *Type_Basic_Constructor(enum BasicType basictype) {
-    return &__basic_type[basictype];
+    return &basic_type[basictype];
 };
 
 
@@ -46,3 +42,14 @@ Type *Type_Array_Constructor(size_t extent, Type *underlying) {
     return ret;
 }
 
+Type *Type_Struct_Constructor(const char *name) {
+    Type *ret = pzalloc(sizeof(Type));
+    ret->typector = TC_STRUCT;
+    ret->width = 0;
+    if (name) ret->name = strpdup(name);
+    return ret;
+}
+
+void Type_Struct_Semantic_Check(Type *type) {
+    // TODO: Check if any member is initialized
+}

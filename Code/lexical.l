@@ -4,10 +4,9 @@
 #include <stdlib.h>
 #include "cmm.h"
 #include "error.h"
-#include "cst.h"
 #include "syntax.tab.h"
 
-cst_node_t *yylval;
+union YYSTYPE yylval;
 cmm_loc_t yylloc = CMM_LOC_INITIALIZER;
 static cmm_loc_t prev_loc = CMM_LOC_INITIALIZER;
 

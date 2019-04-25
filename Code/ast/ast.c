@@ -1,7 +1,3 @@
 #include "ast/ast.h"
+#include "cmm.h"
 
-
-
-void VarList_Append(Variable *var) {
-
-}

@@ -78,7 +78,11 @@ void *pcalloc(size_t nmemb, size_t size) {
 }
 
 void *prealloc(void *ptr, size_t newsize) {
-    return __realloc(ptr, newsize);
+    if (!ptr) {
+        return __alloc(newsize);
+    } else {
+        return __realloc(ptr, newsize);
+    }
 }
 
 char *strpdup(const char *str) {

@@ -2,6 +2,7 @@
 #define __AST_STATEMENT_H__
 
 #include "ast/ast.h"
+#include "ast/variable.h"
 #include "location.h"
 
 typedef enum StmtType {
@@ -13,11 +14,6 @@ typedef enum StmtType {
     STMT_WHILE,
 } StmtType;
 
-typedef struct StmtList {
-    size_t nr_stmt;
-    Expression **stmts;
-} StmtList;
-
 typedef struct Statement {
     enum StmtType type;
     cmm_loc_t location;
@@ -25,28 +21,28 @@ typedef struct Statement {
     union {
         /* compound statement */
         struct {
-            struct VarList varlist;
-            struct StmtList stmtlist;
+            VarList varlist;
+            StmtList stmtlist;
         };
         /* expression statement */
         /* return statement */
-        struct Expression *expr;
+        Expression *expr;
         /* if-then-(else) statement */
         struct {
-            struct Expression *if_cond;
-            struct Statement *stat_if_true;
-            struct Statement *stat_if_false;
+            Expression *if_cond;
+            Statement *stat_if_true;
+            Statement *stat_if_false;
         };
         /* while expression */
         struct {
-            struct Expression *while_cond;
-            struct Statement *while_body;
+            Expression *while_cond;
+            Statement *while_body;
         };
     };
 } Statement;
 
 Statement *
-Statement_Compound_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist)
+Statement_Compound_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist);
 
 Statement *
 Statement_Expression_Constructor(cmm_loc_t location, Expression *expr);

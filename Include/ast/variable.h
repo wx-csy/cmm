@@ -3,19 +3,13 @@
 
 #include "ast/ast.h"
 
-enum VariableType {
-    VAR_GLOBAL,
-    VAR_ARGUMENT,
-    VAR_LOCAL
-};
-
 typedef struct Variable {
-    enum VariableType type;
-    size_t offset;
+    const char *name;
     Type *valtype;
+    Expression *initializer; // nullable
 } Variable;
 
-Variable *
-Variable_Constructor(enum VariableType type, Type *valtype);
+Variable *Variable_Constructor(const char *name, Type *valtype);
+
 
 #endif

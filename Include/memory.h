@@ -1,4 +1,6 @@
-// This is a pool-based memory management library.
+/*
+ * This is a pool-based memory management library.
+ */
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 

@@ -1,9 +1,8 @@
 #include "cmm.h"
 #include "ast/statement.h"
 
-Variable *
-Variable_Constructor(enum VariableType type, Type *valtype) {
+Variable *Variable_Constructor(const char *name, Type *valtype) {
     Variable *ret = pzalloc(sizeof(Variable));
-    ret->type = type;
+    ret->name = strpdup(name);
     ret->valtype = valtype;
 }

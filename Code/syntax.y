@@ -1,9 +1,17 @@
+%code requires {
+    #include "ast/ast.h"
+    #include "ast/expression.h"
+    #include "ast/statement.h"
+    #include "ast/variable.h"
+    #include "ast/function.h"
+    #include "ast/type.h"
+}
+
 %{
 
 #include <stdio.h>
 #include "cmm.h"
 #include "error.h"
-#include "cst.h"
 
 void yyerror(const char*);
 
@@ -18,23 +26,43 @@ void yyerror(const char*);
             (Cur) = YYRHSLOC(Rhs, 0);       \
         }                                   \
     while (0)
+
+/* type for current deflist */
+static Type *Specifier_Type = NULL;
 %}
-h
+
 %union {
+    int int_val;
+    float float_val;
+    const char *name;
+    enum BasicType basictype;
+    enum UnaryOperator unaryop;
     struct Expression *expr;    
     struct Statement *stmt;
+    StmtList stmtlist;
+    struct Type *type;
+    struct {
+         struct Variable *var;
+         struct Type **underlying;
+    } vardec;
+    struct Variable *var;
+    VarList varlist;
+    struct Function *func;
     ArgList arglist;
-    Literal lit;
+    int dummy;
 }
 
 %define parse.error verbose
 %start  Program
-%token  INT FLOAT ID TYPE
-%token  IF WHILE RETURN STRUCT 
+%token <int_val>        INT
+%token <float_val>      FLOAT
+%token <name>           ID
+%token <basictype>      TYPE
+%token IF WHILE RETURN STRUCT
 
 %right      '='
 %left       AND OR
-%left       RELOP
+%left  <unaryop>     RELOP
 %left       '+' '-'
 %left       '*' '/'
 %right      '!' UMINUS
@@ -43,88 +71,150 @@ h
 %nonassoc   LOWER_THAN_ELSE
 %nonassoc   ELSE
 
+/* High-level Definitions */
+%type <dummy> Program ExtDefList ExtDef ExtDecList
+
+/* Specifiers */
+%type <type> Specifier StructSpecifier
+%type <name> OptTag Tag
+
+/* Declarators */
+%type <vardec> VarDec
+%type <func> FunDec
+%type <varlist> VarList
+%type <var> ParamDec
+
+/* Statements */
+%type <stmt> Stmt CompSt
+%type <stmtlist> StmtList
+
+/* Local Definitions */
+%type <varlist> DecList Def DefList
+%type <var> Dec
+
+/* Expressions */
+%type <expr> Exp
+%type <arglist> Args
+
 %%
 
 // High level definitions
 
 Program : 
-      ExtDefList                        { cst = $1; $$ = NULL; }
+      ExtDefList                        {  }
     ;
 
 ExtDefList : 
-      ExtDef ExtDefList                 { BUILD_CST_NODE2($$, $1, $2, "ExtDefList"); }
-    | %empty                            { BUILD_CST_NODE0($$, "ExtDefList"); }
+      ExtDef ExtDefList                 {  }
+    | %empty                            { }
     ;
 
 ExtDef : 
-      Specifier ExtDecList ';'          { BUILD_CST_NODE3($$, $1, $2, $3, "ExtDef"); }
-    | Specifier ';'                     { BUILD_CST_NODE2($$, $1, $2, "ExtDef"); }
-    | Specifier FunDec CompSt           { BUILD_CST_NODE3($$, $1, $2, $3, "ExtDef"); }
-    | error                             { BUILD_CST_NODE0($$, "ExtDef (Error)"); }
+      Specifier ExtDecList ';'          {  }
+    | Specifier ';'                     {  }
+    | Specifier FunDec CompSt           {  }
+    | error                             {  }
     ;
 
-ExtDecList : 
-      VarDec                            { BUILD_CST_NODE1($$, $1, "ExtDecList"); }
-    | VarDec ',' ExtDecList             { BUILD_CST_NODE3($$, $1, $2, $3, "ExtDecList"); }
+ExtDecList :
+      VarDec                            {  }
+    | VarDec ',' ExtDecList             { }
     ;
 
 // Specifiers
 
 Specifier : 
-      TYPE                              { BUILD_CST_NODE1($$, $1, "Specifier"); }
-    | StructSpecifier                   { BUILD_CST_NODE1($$, $1, "Specifier"); }
+      TYPE                              {
+            $$ = Type_Basic_Constructor($TYPE);
+        }
+    | StructSpecifier                   {
+            $$ = $StructSpecifier;
+        }
     ;
 
 StructSpecifier : 
-      STRUCT OptTag '{' DefList '}'     { BUILD_CST_NODE5($$, $1, $2, $3, $4, $5, "StructSpecifier"); }
-    | STRUCT Tag                        { BUILD_CST_NODE2($$, $1, $2, "StructSpecifier"); }
+      STRUCT OptTag                     {
+            $<type>$ = Type_Struct_Constructor(OptTag);
+            symtbl_push_scope(true);
+        } [structdef]
+      '{' DefList '}'                   {
+            $$ = $<type>structdef;
+            $$->varlist = $DefList;
+            $$->symtable = symtbl_scope->variables;
+            symtbl_pop_scope();
+            // TODO: insert to symtbl if tag is not empty
+        }
+    | STRUCT Tag                        {
+            $$ = symtbl_struct_find(Tag);
+        }
     ;
 
 OptTag : 
-      ID                                { BUILD_CST_NODE1($$, $1, "OptTag"); }
-    | %empty                            { BUILD_CST_NODE0($$, "OptTag"); }
+      ID                                { $$ = $ID; }
+    | %empty                            { $$ = NULL; }
     ;
 
 Tag :                                   
-      ID                                { BUILD_CST_NODE1($$, $1, "Tag"); }
+      ID                                { $$ = $ID; }
     ;
 
 // Declarators
 
 VarDec : 
-      ID                                { BUILD_CST_NODE1($$, $1, "VarDec"); }
-    | VarDec '[' INT ']'                { BUILD_CST_NODE4($$, $1, $2, $3, $4, "VarDec"); }
+      ID                                {
+            $$.var = Variable_Constructor($ID, NULL);
+            $$.underlying = &$$.var->valtype;
+        }
+    | VarDec '[' INT ']'                {
+            $$.var = $1.var;
+            $$.underlying =  &(
+                *($1.underlying) = Type_Array_Constructor($INT, NULL)
+            )->underlying;
+        }
     ;
 
 FunDec : 
-      ID '(' VarList ')'                { BUILD_CST_NODE4($$, $1, $2, $3, $4, "FunDec"); }
-    | ID '(' ')'                        { BUILD_CST_NODE3($$, $1, $2, $3, "FunDec"); }
+      ID '(' VarList ')'                {
+            $$ = Function_Constructor($ID, yylloc, NULL, VarList, NULL);
+        }
     ;
 
 VarList : 
-      ParamDec ',' VarList              { BUILD_CST_NODE3($$, $1, $2, $3, "VarList"); }
-    | ParamDec                          { BUILD_CST_NODE1($$, $1, "VarList"); }
+      ParamDec ',' VarList[old]         {
+            $$ = $old;
+            list_prepend(&$$, $ParamDec);
+        }
+    | ParamDec                          {
+            $$ = NULL;
+            list_prepend(&$$, $ParamDec);
+        }
+    | %empty                    {
+            $$ = NULL;
+        }
     ;
 
 ParamDec : 
-      Specifier VarDec                  { BUILD_CST_NODE2($$, $1, $2, "ParamDec"); }
+      Specifier VarDec                  {
+            $$ = $VarDec.var;
+            *($VarDec.underlying) = $Specifier;
+        }
     ;
 
 // Statements
 
 CompSt : 
       '{' DefList StmtList '}'          { 
-          $$ = Statement_Compound_Constructor(yylloc, $DefList, $StmtList);
+            $$ = Statement_Compound_Constructor(yylloc, $DefList, $StmtList);
         }
     ;
 
 StmtList :                              
-      Stmt StmtList                     { 
-            $$ = $StmtList;
-            array_append($$.stmts, $$.nr_stmt, $Stmt);
+      Stmt StmtList[old]                { 
+            $$ = $old;
+            list_prepend(&$$, $Stmt);
         }
     | %empty                            { 
-            memset($$, 0, sizeof(*$$))
+            $$ = NULL;
         }
     ;
 
@@ -141,36 +231,63 @@ Stmt :
     | RETURN Exp ';'                    { 
             $$ = Statement_Return_Constructor(yylloc, $Exp);
         }
-    | IF '(' Exp ')' Stmt %prec LOWER_THAN_ELSE     { 
-            $$ = Statement_IfThen_Constructor(yylloc, $Exp, $Stmt);
+    | IF '(' Exp ')' Stmt[s1] %prec LOWER_THAN_ELSE     { 
+            $$ = Statement_IfThen_Constructor(yylloc, $Exp, $s1);
         }
-    | IF '(' Exp ')' Stmt[s1] ELSE Stmt[s2]         { 
+    | IF '(' Exp ')' Stmt[s1] ELSE Stmt[s2]             {
             $$ = Statement_IfThenElse_Constructor(yylloc, $Exp, $s1, $s2);
         }
-    | WHILE '(' Exp ')' Stmt            { 
-            $$ = Statement_While_Constructor(yylloc, $Exp, $Stmt);
+    | WHILE '(' Exp ')' Stmt[s1]        { 
+            $$ = Statement_While_Constructor(yylloc, $Exp, $s1);
         }
     ;
 
 // Local Definitions
 
 DefList : 
-      Def DefList                       { BUILD_CST_NODE2($$, $1, $2, "DefList"); }
-    | %empty                            { BUILD_CST_NODE0($$, "DefList"); }
+      Def DefList[old]                  {
+            $$ = $old;
+            list_prepend(&$$, $Def);
+        }
+    | %empty                            {
+            $$ = NULL;
+        }
     ;
 
 Def : 
-      Specifier DecList ';'             { BUILD_CST_NODE3($$, $1, $2, $3, "Def"); }
+      Specifier                {
+            Specifier_Type = $Specifier;
+        }
+      DecList ';'                       {
+            $$ = $DecList;
+        }
     ;
 
 DecList : 
-      Dec                               { BUILD_CST_NODE1($$, $1, "DecList"); }
-    | Dec ',' DecList                   { BUILD_CST_NODE3($$, $1, $2, $3, "DecList"); }
+      Dec                               {
+            $$ = NULL;
+            list_prepend(&$$, $Dec);
+        }
+    | Dec ',' DecList[old]              {
+            $$ = $old;
+            list_prepend(&$$, $Dec);
+        }
     ;
 
 Dec : 
-      VarDec                            { BUILD_CST_NODE1($$, $1, "Dec"); }
-    | VarDec '=' Exp                    { BUILD_CST_NODE3($$, $1, $2, $3, "Dec"); }
+      VarDec                            {
+            $$ = $VarDec.var;
+            *($VarDec->underlying) = Specifier_Type;
+        }
+    | VarDec '=' Exp                    {
+            $$ = $VarDec.var;
+            *($VarDec->underlying) = Specifier_Type;
+            if (symtbl_scope->is_struct_scope) {
+                cmm_error(CMM_ERROR_INIT_MEMBER, yylloc);
+            } else {
+                $$->initializer = $Exp;
+            }
+        }
     ;
 
 // Expressions
@@ -180,66 +297,66 @@ Exp :
             $$ = Expression_Assign_Constructor(yylloc, $1, $3);
         }
     | Exp AND Exp                       {
-            $$ = Expression_Binary_Constructor(EXPR_BINARY_AND, yylloc, $1, $3);
+            $$ = Expression_Binary_Constructor(BOP_AND, yylloc, $1, $3);
         }
     | Exp OR Exp                        {
-            $$ = Expression_Binary_Constructor(EXPR_BINARY_OR, yylloc, $1, $3);
+            $$ = Expression_Binary_Constructor(BOP_OR, yylloc, $1, $3);
         }
     | Exp RELOP Exp                     {
             $$ = Expression_Binary_Constructor($2, yylloc, $1, $3);
         }
     | Exp '+' Exp                       {
-            $$ = Expression_Binary_Constructor(EXPR_BINARY_ADD, yylloc, $1, $3);
+            $$ = Expression_Binary_Constructor(BOP_ADD, yylloc, $1, $3);
         }
     | Exp '-' Exp                       {
-            $$ = Expression_Binary_Constructor(EXPR_BINARY_MINUS, yylloc, $1, $3);
+            $$ = Expression_Binary_Constructor(BOP_MINUS, yylloc, $1, $3);
         }
     | Exp '*' Exp                       {
-            $$ = Expression_Binary_Constructor(EXPR_BINARY_STAR, yylloc, $1, $3);
+            $$ = Expression_Binary_Constructor(BOP_STAR, yylloc, $1, $3);
         }
     | Exp '/' Exp                       { 
-            $$ = Expression_Binary_Constructor(EXPR_BINARY_DIV, yylloc, $1, $3);
+            $$ = Expression_Binary_Constructor(BOP_DIV, yylloc, $1, $3);
         }
     | '(' Exp ')'                       { 
-            $$ = $Exp;
+            $$ = $2;
         }
     | '-' Exp   %prec UMINUS            { 
-            $$ = Expression_Unary_Constructor(EXPR_UNARY_NEGATE, yylloc, $Exp);
+            $$ = Expression_Unary_Constructor(UOP_NEGATE, yylloc, $2);
         }
     | '!' Exp   %prec UMINUS            { 
-            $$ = Expression_Unary_Constructor(EXPR_UNARY_NOT, yylloc, $Exp);
+            $$ = Expression_Unary_Constructor(UOP_NOT, yylloc, $2);
         }
-    | ID '(' Args ')'                   { 
-            /* TODO: symtbl lookup */
-        }
-    | ID '(' ')'                        { 
-            /* TODO: symtbl lookup */
+    | ID '(' Args ')'                   {
+            $$ = Expression_FuncCall_Constructor(yylloc, $ID, $Args);
         }
     | Exp '[' Exp ']'                   { 
-            $$ = Expression_ArrayAccess_Constructor(yylloc, $1, $3);
+            $$ = Expression_Binary_Constructor(BOP_ARRAY_ACCESS, yylloc, $1, $3);
         }
     | Exp '.' ID                        { 
-            /* TODO: symtbl lookup */
+            $$ = Expression_MemberAccess_Constructor(yylloc, $1, $ID);
         }
     | ID                                { 
-            /* TODO: symtbl lookup */
+            $$ = Expression_Variable_Constructor(yylloc, $ID);
         }
     | INT                               { 
-            $$ = Literal_Expression_Constructor(yylloc, $FLOAT);
+            $$ = Literal_Expression_int_Constructor(yylloc, $INT);
         }
     | FLOAT                             { 
-            $$ = Literal_Expression_Constructor(yylloc, $FLOAT);
+            $$ = Literal_Expression_float_Constructor(yylloc, $FLOAT);
         }
     ;
 
-Args : 
-      Exp ',' Args                      { 
-            $$ = $Args;
-            array_append($$.args, $$.nr_arg, $Exp);
+Args : // left recurision eases array list construction
+      Exp ',' Args[old]                 {
+            $$ = $old;
+            list_prepend(&$$, $Exp);
         }
-    | Exp                               { 
-            memset($$, 0, sizeof(*$$));
-            array_append($$.args, $$.nr_arg, $Exp);
+    | Exp                               {
+            $$ = NULL;
+            list_prepend(&$$, $Exp);
+        }
+    | %empty                    {
+            $$ = NULL;
         }
     ;
 

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "location.h"
+#include "error.h"
 
 extern cmm_loc_t yylloc;
 

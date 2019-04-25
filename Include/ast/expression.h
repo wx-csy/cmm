@@ -5,37 +5,41 @@
 #include "ast/type.h"
 #include "location.h"
 
+typedef enum UnaryOperator {
+    UOP_NEGATE,
+    UOP_NOT,
+} UnaryOperator;
+
+typedef enum BinaryOperator {
+    BOP_ADD,
+    BOP_MINUS,
+    BOP_STAR,
+    BOP_DIV,
+    BOP_GT,
+    BOP_LT,
+    BOP_GE,
+    BOP_LE,
+    BOP_EQU,
+    BOP_NEQ,
+    BOP_AND,
+    BOP_OR,
+    BOP_ARRAY_ACCESS,
+} BinaryOperator;
+
 typedef enum ExprType {
-    EXPR_BINARY_ADD,
-    EXPR_BINARY_MINUS,
-    EXPR_BINARY_STAR,
-    EXPR_BINARY_DIV,
-    EXPR_BINARY_GT,
-    EXPR_BINARY_LT,
-    EXPR_BINARY_GE,
-    EXPR_BINARY_LE,
-    EXPR_BINARY_EQU,
-    EXPR_BINARY_NEQ,
-    EXPR_BINARY_AND,
-    EXPR_BINARY_OR,
-    EXPR_UNARY_NEGATE,
-    EXPR_UNARY_NOT,
+    EXPR_BINARY_EXPR,
+    EXPR_UNARY_EXPR,
     EXPR_ASSIGN,
     EXPR_FUNCCALL,
-    EXPR_ARRAYACCESS,
+    EXPR_MEMBERACCESS,
     EXPR_VARIABLE,
     EXPR_LITERAL
 } ExprType;
 
-
-typedef struct ArgList {
-    size_t nr_arg;
-    Expression **args;
-} ArgList;
-
 typedef struct Expression {
     enum ExprType type;
     Type *valtype;
+    bool lvalue;
     cmm_loc_t location;
 
     union {
@@ -43,54 +47,55 @@ typedef struct Expression {
         /* binary expression */
         /* assign expression */
         struct {
-            struct Expression *lhs, *rhs;
+            union {
+                enum UnaryOperator uop_type;
+                enum BinaryOperator bop_type;
+            };
+            Expression *lhs, *rhs;
         };
         /* function call */
         struct {
-            struct Function *func;
-            struct ArgList arglist;
+            Function *func;
+            ArgList arglist;
         };
+        /* variable expression */
+        Variable *var;
+        /* member access */
         struct {
-            /* variable expression */
-            struct Variable *var;
-            /* member access */
-            size_t memberid;
+            Expression *expr;
+            Variable *member;
         };
-        struct {
-            union {
-                /* array access */
-                struct Expression *arr;
-                struct Expression *subscript;
-            };
+        /* literal value */
+        union {
+            int lit_int;
+            float lit_float;
         };
-        struct Literal lit;
     };
 } Expression;
 
 Expression *
-Expression_Binary_Constructor(enum ExprType type, cmm_loc_t location,
+Expression_Binary_Constructor(enum BinaryOperator optype, cmm_loc_t location,
                               Expression *lhs, Expression *rhs);
 
 Expression *
-Expression_Unary_Constructor(enum ExprType type, cmm_loc_t location,
+Expression_Unary_Constructor(enum UnaryOperator optype, cmm_loc_t location,
                              Expression *rhs);
 
 Expression *
-Expression_Assign_Constructor(cmm_loc_t location,
-                              Expression *lhs, Expression *rhs);
+Expression_Assign_Constructor(cmm_loc_t location, Expression *lhs, Expression *rhs);
 
 Expression *
-Expression_FuncCall_Constructor(cmm_loc_t location,
-                                Function *func, Expression *rhs);
+Expression_FuncCall_Constructor(cmm_loc_t location, const char *funcname, ArgList args);
 
 Expression *
-Expression_ArrayAccess_Constructor(cmm_loc_t location,
-                                   Expression *arr, Expression *subscript);
+Expression_MemberAccess_Constructor(cmm_loc_t location, Expression *expr, const char *memname);
 
 Expression *
-Expression_Variable_Constructor(cmm_loc_t location, Variable *var);
+Expression_Variable_Constructor(cmm_loc_t location, const char *varname);
 
 Expression *
-Expression_Literal_Constructor(cmm_loc_t location, Literal lit);
+Expression_Literal_int_Constructor(cmm_loc_t location, int value);
 
+Expression *
+Expression_Literal_float_Constructor(cmm_loc_t location, float value);
 #endif
