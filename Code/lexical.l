@@ -80,14 +80,13 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
                         errno = 0;                        
                         if (yytext[0] == '0' && yytext[1] == 'x') {
                             /* hexadecimal number literal */
-                            long value = strtol(yytext, &endptr, 16);
+                            unsigned long value = strtol(yytext, &endptr, 16);
                             if (*endptr != '\0') {
                                 cmm_error(CMM_ERROR_INVHEXLIT, yylloc, yytext);
                             } else if (errno == ERANGE) {
                                 cmm_error(CMM_ERROR_INTLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(yylloc, 1, 
-                                "INT: %d", value);
+                            yylval.int_val = value;
                             return INT;
 
                         } if (strchr(yytext, '.') || strchr(yytext, 'e') ||
@@ -99,102 +98,103 @@ identifier          [a-zA-Z_][a-zA-Z0-9_]*
                             } else if (errno == ERANGE) {
                                 cmm_error(CMM_ERROR_FPLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(yylloc, 1,
-                                "FLOAT: %.6f", value);
+                            yylval.float_val = value;
                             return FLOAT;
                                 
                         } else if (yytext[0] == '0') {
                             /* octal number literal */
-                            long value = strtol(yytext, &endptr, 8);
+                            unsigned long value = strtol(yytext, &endptr, 8);
                             if (*endptr != '\0') {
                                 cmm_error(CMM_ERROR_INVOCTLIT, yylloc, yytext);
                             } else if (errno == ERANGE) {
                                 cmm_error(CMM_ERROR_INTLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(yylloc, 1, 
-                                "INT: %d", value);
+                            yylval.int_val = value;
                             return INT;
 
                         } else {
                             /* decimal number literal */
-                            long value = strtol(yytext, &endptr, 10);
+                            unsigned long value = strtol(yytext, &endptr, 10);
                             if (*endptr != '\0') {
                                 cmm_error(CMM_ERROR_INVDECLIT, yylloc, yytext);
                             } else if (errno == ERANGE) {
                                 cmm_error(CMM_ERROR_INTLIT_OF, yylloc, yytext);
                             }
-                            yylval = cst_node_ctor(yylloc, 1,
-                                "INT: %d", value);
+                            yylval.int_val = value;
                             return INT;
 
                         }
                     }
 
-int|float           {
-                        yylval = cst_node_ctor(yylloc, 1, "TYPE: %s", yytext);
+int                 {
+                        yylval.basictype = BT_INT;
+                        return TYPE;
+                    }
+
+float               {
+                        yylval.basictype = BT_FLOAT;
                         return TYPE;
                     }
 
 struct              {
-                        yylval = cst_node_ctor(yylloc, 1, "STRUCT");
                         return STRUCT;
                     }
 
 if                  {
-                        yylval = cst_node_ctor(yylloc, 1, "IF");
                         return IF;
                     }
 
 else                {
-                        yylval = cst_node_ctor(yylloc, 1, "ELSE");
                         return ELSE;
                     }
 
 while               {
-                        yylval = cst_node_ctor(yylloc, 1, "WHILE");
                         return WHILE;
                     }
 
 return              {
-                        yylval = cst_node_ctor(yylloc, 1, "RETURN");
                         return RETURN;
                     }
 
 {relop}             {
-                        yylval = cst_node_ctor(yylloc, 1, "RELOP");
+                        if (strcmp(yytext, ">") == 0) {
+                            yylval.binaryop = BOP_GT;
+                        } else if (strcmp(yytext, "<") == 0) {
+                            yylval.binaryop = BOP_LT;
+                        } else if (strcmp(yytext, ">=") == 0) {
+                            yylval.binaryop = BOP_GE;
+                        } else if (strcmp(yytext, "<=") == 0) {
+                            yylval.binaryop = BOP_LE;
+                        } else if (strcmp(yytext, "==") == 0) {
+                            yylval.binaryop = BOP_EQU;
+                        } else if (strcmp(yytext, "!=") == 0) {
+                            yylval.binaryop = BOP_NEQ;
+                        }
                         return RELOP;
                     }
 
 {identifier}        {
-                        yylval = cst_node_ctor(yylloc, 1, "ID: %s", yytext);
+                        yylval.name = yytext;
                         return ID;
                     }
 
 &&                  {
-                        yylval = cst_node_ctor(yylloc, 1, "AND");
                         return AND;
                     }
 
 \|\|                {
-                        yylval = cst_node_ctor(yylloc, 1, "OR");
                         return OR;
                     }
 
 [(){};!=.,]         {
-                        yylval = cst_node_ctor(yylloc, 1, 
-                            token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
 [-+/*]              {
-                        yylval = cst_node_ctor(yylloc, 1,
-                            token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 
 \[|\]               {
-                        yylval = cst_node_ctor(yylloc, 1,
-                            token_name[UCHAR(yytext[0])]);
                         return yytext[0];
                     }
 

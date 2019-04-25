@@ -29,7 +29,7 @@ static void __init() {
     atexit(__free); // register cleanup function on exit
 }
 
-static void *__newpool(size_t min_size) {
+static void __newpool(size_t min_size) {
     size_t size = min_size;
     if (size < POOL_SIZE) size = POOL_SIZE;
     struct mempool *newpool = calloc(1, sizeof(struct mempool));

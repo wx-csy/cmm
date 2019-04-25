@@ -15,11 +15,13 @@ BUILD_DIR     = Build
 SRC_DIR       = Code
 INCLUDE_DIR   = Include
 
-SRCS = $(SRC_DIR)/error.c $(SRC_DIR)/symtbl.c
-SRCS += $(SRC_DIR)/lex.yy.c $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/main.c
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c \
     $(TARGET_NAME)
+
+SRCS = $(shell find $(SRC_DIR) -type f \
+    \( -iname "*.c" -not \( -iname "*.yy.c" -or -iname "*.tab.c" \) \) )
+SRCS += $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.cs
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 CFLAGS += -iquote./$(INCLUDE_DIR)
 CFLAGS += -I./$(INCLUDE_DIR)/container

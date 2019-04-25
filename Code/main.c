@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "error.h"
 #include "cmm.h"
-#include "cst.h"
 
 int main(int argc, char *argv[]) {
     if (argc > 1) {
@@ -11,7 +10,9 @@ int main(int argc, char *argv[]) {
         }
     }
     yyparse();
-    if (cmm_nr_error == 0) cst_node_print(cst, 0);
+    if (cmm_nr_error == 0) {
+        
+    }
     return 0;
 }
 

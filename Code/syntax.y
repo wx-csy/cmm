@@ -1,13 +1,22 @@
 %code requires {
-    #include "ast/ast.h"
-    #include "ast/expression.h"
-    #include "ast/statement.h"
-    #include "ast/variable.h"
-    #include "ast/function.h"
-    #include "ast/type.h"
+
+#include "ast/ast.h"
+#include "ast/expression.h"
+#include "ast/statement.h"
+#include "ast/variable.h"
+#include "ast/function.h"
+#include "ast/type.h"
+
 }
 
 %{
+
+#include "ast/ast.h"
+#include "ast/expression.h"
+#include "ast/statement.h"
+#include "ast/variable.h"
+#include "ast/function.h"
+#include "ast/type.h"
 
 #include <stdio.h>
 #include "cmm.h"
@@ -32,11 +41,13 @@ static Type *Specifier_Type = NULL;
 %}
 
 %union {
-    int int_val;
+    unsigned long int_val;
     float float_val;
     const char *name;
     enum BasicType basictype;
-    enum UnaryOperator unaryop;
+    enum BinaryOperator binaryop;
+
+    struct Program *program;
     struct Expression *expr;    
     struct Statement *stmt;
     StmtList stmtlist;
@@ -62,7 +73,7 @@ static Type *Specifier_Type = NULL;
 
 %right      '='
 %left       AND OR
-%left  <unaryop>     RELOP
+%left  <binaryop>     RELOP
 %left       '+' '-'
 %left       '*' '/'
 %right      '!' UMINUS
@@ -134,7 +145,11 @@ Specifier :
 
 StructSpecifier : 
       STRUCT OptTag                     {
-            $<type>$ = Type_Struct_Constructor(OptTag);
+      	    if ($OptTag) {
+            	$<type>$ = Type_Struct_Constructor($OptTag);
+            } else {
+            	$<type>$ = Type_Struct_Constructor("<anonymous struct>");
+            }
             symtbl_push_scope(true);
         } [structdef]
       '{' DefList '}'                   {
@@ -145,7 +160,7 @@ StructSpecifier :
             // TODO: insert to symtbl if tag is not empty
         }
     | STRUCT Tag                        {
-            $$ = symtbl_struct_find(Tag);
+            $$ = symtbl_struct_find($Tag);
         }
     ;
 
@@ -175,7 +190,7 @@ VarDec :
 
 FunDec : 
       ID '(' VarList ')'                {
-            $$ = Function_Constructor($ID, yylloc, NULL, VarList, NULL);
+            $$ = Function_Constructor($ID, yylloc, NULL, $VarList, NULL);
         }
     ;
 
@@ -188,7 +203,7 @@ VarList :
             $$ = NULL;
             list_prepend(&$$, $ParamDec);
         }
-    | %empty                    {
+    | %empty                    	{
             $$ = NULL;
         }
     ;
@@ -246,8 +261,8 @@ Stmt :
 
 DefList : 
       Def DefList[old]                  {
-            $$ = $old;
-            list_prepend(&$$, $Def);
+            $$ = $Def;
+            list_join(&$$, $old);
         }
     | %empty                            {
             $$ = NULL;
@@ -277,11 +292,11 @@ DecList :
 Dec : 
       VarDec                            {
             $$ = $VarDec.var;
-            *($VarDec->underlying) = Specifier_Type;
+            *$VarDec.underlying = Specifier_Type;
         }
     | VarDec '=' Exp                    {
             $$ = $VarDec.var;
-            *($VarDec->underlying) = Specifier_Type;
+            *$VarDec.underlying = Specifier_Type;
             if (symtbl_scope->is_struct_scope) {
                 cmm_error(CMM_ERROR_INIT_MEMBER, yylloc);
             } else {
@@ -339,10 +354,10 @@ Exp :
             $$ = Expression_Variable_Constructor(yylloc, $ID);
         }
     | INT                               { 
-            $$ = Literal_Expression_int_Constructor(yylloc, $INT);
+            $$ = Expression_Literal_int_Constructor(yylloc, $INT);
         }
     | FLOAT                             { 
-            $$ = Literal_Expression_float_Constructor(yylloc, $FLOAT);
+            $$ = Expression_Literal_float_Constructor(yylloc, $FLOAT);
         }
     ;
 

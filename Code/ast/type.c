@@ -46,7 +46,7 @@ Type *Type_Struct_Constructor(const char *name) {
     Type *ret = pzalloc(sizeof(Type));
     ret->typector = TC_STRUCT;
     ret->width = 0;
-    if (name) ret->name = strpdup(name);
+    ret->name = strpdup(name);
     return ret;
 }
 

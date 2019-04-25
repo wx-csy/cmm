@@ -3,7 +3,7 @@
 
 #include "memory.h"
 
-#define declare_list_node(tname, tmember)                                        \
+#define declare_list_node(tname, tmember)                                   \
     struct tname {                                                          \
         tmember data;                                                       \
         struct tname *next;                                                 \
@@ -19,10 +19,10 @@
     } while (0)
 
 // append list2 to list1
-#define list_join(list1, list2)                                             \
+#define list_join(plist1, list2)                                            \
     do {                                                                    \
-        typeof(list) *plist = &(list1);                                     \
-        while (*plist) plist = &(*plist->next);                             \
-        *plist = &(list2);                                                  \
+        typeof(plist1) _plist = (plist1);                                   \
+        while (*_plist) _plist = &((*_plist)->next);                        \
+        *_plist = list2;                                                    \
     } while (0)
 #endif

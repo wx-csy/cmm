@@ -51,7 +51,7 @@ void cmm_error(int cmm_errno, cmm_loc_t loc, ...) {
     cmm_nr_error++;
     switch (cmm_errno / 1000) {
     case 0: /* system error */
-        fprintf(stderr, errfmt[0]);
+        fputs(errfmt[0], stderr);
         break;
     case 1: /* lexical error */
         fprintf(stderr, errfmt[1], loc.line, loc.col);

@@ -8,4 +8,5 @@ Function *Function_Constructor(const char *name, cmm_loc_t location,
     ret->rettype = rettype;
     ret->paramlist = paramlist;
     ret->stmt = stmt;
+    return ret;
 }

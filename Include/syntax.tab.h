@@ -42,14 +42,16 @@ extern int yydebug;
 /* "%code requires" blocks.  */
 #line 1 "Code/syntax.y" /* yacc.c:1909  */
 
-    #include "ast/ast.h"
-    #include "ast/expression.h"
-    #include "ast/statement.h"
-    #include "ast/variable.h"
-    #include "ast/function.h"
-    #include "ast/type.h"
 
-#line 53 "Include/syntax.tab.h" /* yacc.c:1909  */
+#include "ast/ast.h"
+#include "ast/expression.h"
+#include "ast/statement.h"
+#include "ast/variable.h"
+#include "ast/function.h"
+#include "ast/type.h"
+
+
+#line 55 "Include/syntax.tab.h" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -78,13 +80,15 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 34 "Code/syntax.y" /* yacc.c:1909  */
+#line 43 "Code/syntax.y" /* yacc.c:1909  */
 
-    int int_val;
+    unsigned long int_val;
     float float_val;
     const char *name;
     enum BasicType basictype;
-    enum UnaryOperator unaryop;
+    enum BinaryOperator binaryop;
+
+    struct Program *program;
     struct Expression *expr;    
     struct Statement *stmt;
     StmtList stmtlist;
@@ -99,7 +103,7 @@ union YYSTYPE
     ArgList arglist;
     int dummy;
 
-#line 103 "Include/syntax.tab.h" /* yacc.c:1909  */
+#line 107 "Include/syntax.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
