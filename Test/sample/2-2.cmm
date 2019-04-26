@@ -1,4 +1,0 @@
-int main() {
-    int i = 0;
-    inc(i);     // type 2: undefined function 'inc'
-}

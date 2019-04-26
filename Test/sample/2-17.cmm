@@ -1,3 +1,0 @@
-int main() {
-    struct Position pos;    // type 17: undefined 'position'
-}

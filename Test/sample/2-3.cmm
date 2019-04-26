@@ -1,4 +1,0 @@
-int main() {
-    int i, j;
-    int i;  // type 3: redefined 'i'
-}

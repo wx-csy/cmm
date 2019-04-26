@@ -164,10 +164,6 @@ Expression *
 Expression_Variable_Constructor(cmm_loc_t location, const char *varname) {
     Expression *ret = palloc(sizeof(Expression));
     Variable *var = symtbl_variable_find(varname, location);
-    if (var == NULL) {
-        // TODO: add dummy variable
-        cmm_error(CMM_ERROR_UNDEF_VAR, location, varname);
-    }
     ret->type = EXPR_VARIABLE;
     ret->location = location;
     ret->valtype = var->valtype;

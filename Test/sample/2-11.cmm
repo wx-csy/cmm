@@ -1,5 +1,0 @@
-int main()
-{
-    int i;
-    i(10);  // type 11: 'i' is not a function
-}

@@ -1,9 +1,0 @@
-struct Position {
-    float x, y;
-};
-
-int main() {
-    struct Position p;
-    if (p.n == 3.7)     // type 14: non-existent field 'n'
-        return 0;
-}
