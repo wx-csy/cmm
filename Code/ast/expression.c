@@ -128,7 +128,14 @@ Expression_FuncCall_Constructor(cmm_loc_t location, const char *funcname, ArgLis
     ret->lvalue = false;
     ret->func = func;
     ret->arglist = args;
-    // TODO: argument type check
+    VarList param = func->paramlist;
+    ArgList arg = args;
+    // TODO: for dummy function, do not perform argument check
+    for (; param && arg; param = param->next, arg = arg->next)
+        if (!Type_Compatible(param->data->valtype, arg->data->valtype))
+            cmm_error(CMM_ERROR_ARG_TYPE_MISMATCH, location);
+    if (param || arg)
+        cmm_error(CMM_ERROR_ARG_NUMBER_MISMATCH, location);
     return ret;
 }
 

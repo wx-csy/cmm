@@ -28,6 +28,7 @@ static const char *errmsg[65536] = {
     [CMM_ERROR_OPERAND_TYPE_MISMATCH] = "operand type mismatch",
     [CMM_ERROR_RETURN_TYPE_MISMATCH] = "function return type mismatch",
     [CMM_ERROR_ARG_TYPE_MISMATCH] = "function argument type mismatch",
+    [CMM_ERROR_ARG_NUMBER_MISMATCH] = "function argument number mismatch",
     [CMM_ERROR_INVSUB]      = "subscript to non-array type",
     [CMM_ERROR_INVCALL]     = "call to non-function object",
     [CMM_ERROR_INVSUBTYPE]  = "array subscript is not an integer",
