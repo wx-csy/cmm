@@ -76,7 +76,7 @@ Expression *lhs, Expression *rhs) {
     Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_BINARY_EXPR;
     ret->location = location;
-    ret->lvalue = false;
+    ret->lvalue = (optype == BOP_ARRAY_ACCESS);
     ret->bop_type = optype;
     ret->valtype = __get_binary_operand_return_type(location, optype,
         lhs->valtype, rhs->valtype);
@@ -103,6 +103,10 @@ Expression_Assign_Constructor(cmm_loc_t location, Expression *lhs, Expression *r
     Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_ASSIGN;
     ret->location = location;
+    if (!lhs->lvalue)
+        cmm_error(CMM_ERROR_ASSIGN_TO_RVALUE, location);
+    if (!Type_Compatible(lhs->valtype, rhs->valtype))
+        cmm_error(CMM_ERROR_ASSIGN_TYPE_MISMATCH, location);
     ret->valtype = lhs->valtype;
     ret->lvalue = true;
     ret->lhs = lhs;
@@ -128,14 +132,25 @@ Expression_FuncCall_Constructor(cmm_loc_t location, const char *funcname, ArgLis
     return ret;
 }
 
+static inline Variable *
+__MemberAccess(cmm_loc_t location, Expression *expr, const char *memname) {
+    if (expr->valtype->typector != TC_STRUCT) {
+        cmm_error(CMM_ERROR_MEMBER_NONSTRUCT, location);
+        return &Variable_Invalid;
+    } else {
+        Variable *member = symtbl_find(&expr->valtype->symtable, memname);
+        if (member == NULL) {
+            cmm_error(CMM_ERROR_UNDEF_MEMBER, location, expr->valtype->name, memname);
+            return &Variable_Invalid;
+        }
+        return member;
+    }
+}
+
 Expression *
 Expression_MemberAccess_Constructor(cmm_loc_t location, Expression *expr, const char *memname) {
     Expression *ret = palloc(sizeof(Expression));
-    Variable *member =  symtbl_find(&expr->valtype->symtable, memname);
-    if (member == NULL) {
-        // TODO: add dummy member
-        cmm_error(CMM_ERROR_UNDEF_MEMBER, location, memname);
-    }
+    Variable *member = __MemberAccess(location, expr, memname);
     ret->type = EXPR_MEMBERACCESS;
     ret->location = location;
     ret->valtype = member->valtype;
@@ -148,7 +163,7 @@ Expression_MemberAccess_Constructor(cmm_loc_t location, Expression *expr, const 
 Expression *
 Expression_Variable_Constructor(cmm_loc_t location, const char *varname) {
     Expression *ret = palloc(sizeof(Expression));
-    Variable *var = symtbl_variable_find(varname);
+    Variable *var = symtbl_variable_find(varname, location);
     if (var == NULL) {
         // TODO: add dummy variable
         cmm_error(CMM_ERROR_UNDEF_VAR, location, varname);

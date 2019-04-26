@@ -6,6 +6,7 @@
 #ifndef __SYMTBL_H__
 #define __SYMTBL_H__
 #include "ast/ast.h"
+#include "location.h"
 
 struct symtbl_entry {
     const char *name;
@@ -48,9 +49,9 @@ void symtbl_pop_scope();
 
 Function *symtbl_function_find(const char *name);
 bool symtbl_function_insert(const char *name, Function *func);
-Variable *symtbl_variable_find(const char *name);
+Variable *symtbl_variable_find(const char *name, cmm_loc_t location);
 bool symtbl_variable_insert(const char *name, Variable *var);
-Type *symtbl_struct_find(const char *name);
+Type *symtbl_struct_find(const char *name, cmm_loc_t location);
 bool symtbl_struct_insert(const char *name, Type *type);
 
 #endif

@@ -75,12 +75,13 @@ bool symtbl_function_insert(const char *name, Function *func) {
     return ret;
 }
 
-Variable *symtbl_variable_find(const char *name) {
+Variable *symtbl_variable_find(const char *name, cmm_loc_t location) {
     for (struct symscope *cur = symtbl_scope; cur; cur = cur->prev) {
         struct Variable *result = symtbl_find(&cur->variables, name);
         if (result) return result;
     }
-    return NULL;
+    cmm_error(CMM_ERROR_UNDEF_VAR, location, name);
+    return &Variable_Invalid;
 }
 
 bool symtbl_variable_insert(const char *name, Variable *var) {
@@ -98,12 +99,13 @@ bool symtbl_variable_insert(const char *name, Variable *var) {
     return ret;
 }
 
-Type *symtbl_struct_find(const char *name) {
+Type *symtbl_struct_find(const char *name, cmm_loc_t location) {
     for (struct symscope *cur = symtbl_scope; cur; cur = cur->prev) {
         struct Type *result = symtbl_find(&cur->structs, name);
         if (result) return result;
     }
-    return NULL;
+    cmm_error(CMM_ERROR_UNDEF_STRUCT, location, name);
+    return &Type_Invalid;
 }
 
 bool symtbl_struct_insert(const char *name, Type *type) {

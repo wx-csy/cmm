@@ -204,7 +204,7 @@ StructSpecifier :
             if ($OptTag) symtbl_struct_insert($OptTag, $$);
         }
     | STRUCT Tag                        {
-            $$ = symtbl_struct_find($Tag);
+            $$ = symtbl_struct_find($Tag, yylloc);
         }
     ;
 

@@ -57,11 +57,11 @@ $(INCLUDE_DIR)/syntax.tab.h : $(SRC_DIR)/syntax.tab.c
 
 $(BUILD_DIR)/$(TARGET_NAME) : $(OBJS)
 	@mkdir -p $(dir $@)
-	@echo + [LD] $^
+	@echo + [LD] $@
 	@$(LD) $(LDFLAGS) -o $@ $^
 
 $(TARGET_NAME): $(BUILD_DIR)/$(TARGET_NAME)
-	@echo + [CP] $^
+	@echo + [CP] $@
 	@cp $< $@
 
 run: $(TARGET_NAME)

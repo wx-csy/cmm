@@ -1520,7 +1520,7 @@ yyreduce:
   case 16:
 #line 206 "Code/syntax.y" /* yacc.c:1646  */
     {
-            (yyval.type) = symtbl_struct_find((yyvsp[0].name));
+            (yyval.type) = symtbl_struct_find((yyvsp[0].name), yylloc);
         }
 #line 1526 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
