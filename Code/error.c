@@ -24,6 +24,7 @@ static const char *errmsg[65536] = {
     [CMM_ERROR_REDEF_VAR]   = "redefinition of variable '%s'",
     [CMM_ERROR_REDEF_FUNC]  = "redefinition of function '%s'",
     [CMM_ERROR_ASSIGN_TYPE_MISMATCH] = "assignment type mismatch",
+    [CMM_ERROR_INIT_TYPE_MISMATCH] = "type mismatch in initializer",
     [CMM_ERROR_ASSIGN_TO_RVALUE]  = "lvalue required as left operand of assignment",
     [CMM_ERROR_OPERAND_TYPE_MISMATCH] = "operand type mismatch",
     [CMM_ERROR_RETURN_TYPE_MISMATCH] = "function return type mismatch",

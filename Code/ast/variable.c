@@ -1,4 +1,5 @@
 #include "cmm.h"
+#include "ast/expression.h"
 #include "ast/statement.h"
 #include "ast/variable.h"
 #include "ast/type.h"
@@ -15,3 +16,10 @@ Variable *Variable_Constructor(cmm_loc_t location, const char *name) {
     return ret;
 }
 
+void Variable_Add_Initializer(Variable *var, Expression *init) {
+    if (!Type_Compatible(var->valtype, init->valtype)) {
+        cmm_error(CMM_ERROR_INIT_TYPE_MISMATCH, init->location);
+    } else {
+        var->initializer = init;
+    }
+}

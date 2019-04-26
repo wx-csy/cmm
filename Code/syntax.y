@@ -144,8 +144,10 @@ ExtDef :
             $$ = $ExtDecList;
         }
     | Specifier ';'                     { }
-    | Specifier FunDec CompSt           {
+    | Specifier FunDec                  {
             $FunDec->rettype = $Specifier;
+        }
+      CompSt                            {
             $FunDec->stmt = $CompSt;
             symtbl_pop_scope();
             memset(&$$, 0, sizeof($$));
@@ -350,18 +352,20 @@ DecList :
 
 Dec : 
       VarDec                            {
-            $$ = $VarDec.var;
             *$VarDec.underlying = Specifier_Type;
-            Type_Array_Semantic_Finalize($$->valtype);
+            Type_Array_Semantic_Finalize($VarDec.var->valtype);
+            $$ = $VarDec.var;
         }
-    | VarDec '=' Exp                    {
-            $$ = $VarDec.var;
+    | VarDec '='                        {
             *$VarDec.underlying = Specifier_Type;
-            Type_Array_Semantic_Finalize($$->valtype);
+            Type_Array_Semantic_Finalize($VarDec.var->valtype);
+        }
+      Exp                               {
+            $$ = $VarDec.var;
             if (symtbl_scope->is_struct_scope) {
                 cmm_error(CMM_ERROR_INIT_MEMBER, yylloc);
             } else {
-                $$->initializer = $Exp;
+                Variable_Add_Initializer($$, $Exp);
             }
         }
     ;

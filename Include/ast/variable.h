@@ -15,5 +15,5 @@ typedef struct Variable {
 extern Variable Variable_Invalid;
 
 Variable *Variable_Constructor(cmm_loc_t location, const char *name);
-
+void Variable_Add_Initializer(Variable *var, Expression *init);
 #endif
