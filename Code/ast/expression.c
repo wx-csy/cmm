@@ -76,7 +76,7 @@ Expression *lhs, Expression *rhs) {
     Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_BINARY_EXPR;
     ret->location = location;
-    ret->lvalue = (optype == BOP_ARRAY_ACCESS);
+    ret->lvalue = (optype == BOP_ARRAY_ACCESS ? lhs->lvalue : false);
     ret->bop_type = optype;
     ret->valtype = __get_binary_operand_return_type(location, optype,
         lhs->valtype, rhs->valtype);

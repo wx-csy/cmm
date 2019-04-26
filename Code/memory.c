@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "memory.h"
 
@@ -8,6 +9,10 @@ static struct mempool {
     size_t remain;
     struct mempool *prev;
 } *pool = NULL;
+
+#ifdef DEBUG
+static size_t poolcnt = 0, tot_size = 0;
+#endif
 
 struct memchunk {
     size_t size;
@@ -23,11 +28,19 @@ static void __free() {
         pool = pool->prev;
         free(tmp);
     }
+#ifdef DEBUG
+    fprintf(stderr, "[memory] a total of %ld pools (%ld bytes) allocated\n", poolcnt, tot_size);
+#endif
 }
 
 static void __newpool(size_t min_size) {
     size_t size = min_size;
     if (size < POOL_SIZE) size = POOL_SIZE;
+#ifdef DEBUG
+    fprintf(stderr, "[memory] allocating new pool of size %ld\n", min_size);
+    poolcnt++;
+    tot_size += size;
+#endif
     struct mempool *newpool = calloc(1, sizeof(struct mempool));
     newpool->ptr = malloc(size);
     newpool->size = size;
