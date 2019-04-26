@@ -117,11 +117,7 @@ Expression_Assign_Constructor(cmm_loc_t location, Expression *lhs, Expression *r
 Expression *
 Expression_FuncCall_Constructor(cmm_loc_t location, const char *funcname, ArgList args) {
     Expression *ret = palloc(sizeof(Expression));
-    Function *func = symtbl_function_find(funcname);
-    if (func == NULL) {
-        // TODO: add dummy function
-        cmm_error(CMM_ERROR_UNDEF_FUNC, location, funcname);
-    }
+    Function *func = symtbl_function_find(funcname, location);
     ret->type = EXPR_FUNCCALL;
     ret->location = location;
     ret->valtype = func->rettype;
@@ -130,7 +126,9 @@ Expression_FuncCall_Constructor(cmm_loc_t location, const char *funcname, ArgLis
     ret->arglist = args;
     VarList param = func->paramlist;
     ArgList arg = args;
-    // TODO: for dummy function, do not perform argument check
+    // for dummy function, do not perform argument check
+    if (func == &Function_Invalid) return ret;
+
     for (; param && arg; param = param->next, arg = arg->next)
         if (!Type_Compatible(param->data->valtype, arg->data->valtype))
             cmm_error(CMM_ERROR_ARG_TYPE_MISMATCH, location);
@@ -163,7 +161,7 @@ Expression_MemberAccess_Constructor(cmm_loc_t location, Expression *expr, const 
     ret->valtype = member->valtype;
     ret->expr = expr;
     ret->member = member;
-    ret->lvalue = true;
+    ret->lvalue = expr->lvalue;
     return ret;
 }
 

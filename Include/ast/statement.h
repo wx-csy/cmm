@@ -27,7 +27,10 @@ typedef struct Statement {
         };
         /* expression statement */
         /* return statement */
-        Expression *expr;
+        struct {
+            Expression *expr;
+            Function *func;
+        };
         /* if-then-(else) statement */
         struct {
             Expression *if_cond;
@@ -51,7 +54,7 @@ Statement *
 Statement_Expression_Constructor(cmm_loc_t location, Expression *expr);
 
 Statement *
-Statement_Return_Constructor(cmm_loc_t location, Expression *expr);
+Statement_Return_Constructor(cmm_loc_t location, Expression *expr, Function *func);
 
 Statement *
 Statement_IfThen_Constructor(cmm_loc_t location, Expression *if_cond, Statement *stat_if_true);

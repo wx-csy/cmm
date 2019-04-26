@@ -12,5 +12,7 @@ typedef struct Function {
     Statement *stmt;
 } Function;
 
+extern Function Function_Invalid;
+
 Function *Function_Constructor(const char *name, cmm_loc_t location);
 #endif

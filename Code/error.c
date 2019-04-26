@@ -27,6 +27,8 @@ static const char *errmsg[65536] = {
     [CMM_ERROR_INIT_TYPE_MISMATCH] = "type mismatch in initializer",
     [CMM_ERROR_ASSIGN_TO_RVALUE]  = "lvalue required as left operand of assignment",
     [CMM_ERROR_OPERAND_TYPE_MISMATCH] = "operand type mismatch",
+    [CMM_ERROR_IF_TYPE_MISMATCH] = "if condition must be integer",
+    [CMM_ERROR_WHILE_TYPE_MISMATCH] = "while condition must be integer",
     [CMM_ERROR_RETURN_TYPE_MISMATCH] = "function return type mismatch",
     [CMM_ERROR_ARG_TYPE_MISMATCH] = "function argument type mismatch",
     [CMM_ERROR_ARG_NUMBER_MISMATCH] = "function argument number mismatch",
@@ -38,7 +40,7 @@ static const char *errmsg[65536] = {
     [CMM_ERROR_REDEF_MEMBER] = "redefition of member '%s'",
     [CMM_ERROR_INIT_MEMBER]  = "initialization within struct not allowed",
     [CMM_ERROR_REDEF_STRUCT] = "redefinition of 'struct %s'",
-    [CMM_ERROR_UNDEF_STRUCT] = "undefined struct '%s'"
+    [CMM_ERROR_UNDEF_STRUCT] = "undefined 'struct %s'"
  };
 
 static const char *errfmt[16] = {

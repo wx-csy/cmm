@@ -58,12 +58,13 @@ void symtbl_pop_scope() {
     symtbl_scope = symtbl_scope->prev;
 }
 
-Function *symtbl_function_find(const char *name) {
+Function *symtbl_function_find(const char *name, cmm_loc_t location) {
     for (struct symscope *cur = symtbl_scope; cur; cur = cur->prev) {
         struct Function *result = symtbl_find(&cur->functions, name);
         if (result) return result;
     }
-    return NULL;
+    cmm_error(CMM_ERROR_UNDEF_FUNC, location, name);
+    return &Function_Invalid;
 }
 
 bool symtbl_function_insert(const char *name, Function *func) {

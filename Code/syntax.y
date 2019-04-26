@@ -40,6 +40,7 @@ void yyerror(const char*);
 
 /* type for current deflist */
 static Type *Specifier_Type = NULL;
+static Function *Current_Function = NULL;
 %}
 
 %union {
@@ -238,6 +239,7 @@ VarDec :
 FunDec : 
       ID                                {
             $<func>$ = Function_Constructor($ID, yylloc);
+            Current_Function = $<func>$;
             symtbl_function_insert($ID, $<func>$);
             symtbl_push_scope(false);
         }[func]
@@ -308,7 +310,7 @@ Stmt :
             $$ = $CompSt;
         }
     | RETURN Exp ';'                    { 
-            $$ = Statement_Return_Constructor(yylloc, $Exp);
+            $$ = Statement_Return_Constructor(yylloc, $Exp, Current_Function);
         }
     | IF '(' Exp ')' Stmt[s1] %prec LOWER_THAN_ELSE     { 
             $$ = Statement_IfThen_Constructor(yylloc, $Exp, $s1);

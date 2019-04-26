@@ -47,7 +47,7 @@ void symtbl_push_scope(bool is_struct_scope);
 /* Restore the old scope for name lookup */
 void symtbl_pop_scope();
 
-Function *symtbl_function_find(const char *name);
+Function *symtbl_function_find(const char *name, cmm_loc_t location);
 bool symtbl_function_insert(const char *name, Function *func);
 Variable *symtbl_variable_find(const char *name, cmm_loc_t location);
 bool symtbl_variable_insert(const char *name, Variable *var);
