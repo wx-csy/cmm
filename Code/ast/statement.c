@@ -1,6 +1,8 @@
 #include "cmm.h"
 #include "ast/statement.h"
 
+Statement Statement_Invalid = { .type = STMT_INVALID };
+
 Statement *
 Statement_Compound_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist) {
     Statement *ret = palloc(sizeof(Statement));

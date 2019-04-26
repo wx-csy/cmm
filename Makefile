@@ -7,6 +7,7 @@ BISON	= bison
 
 CFLAGS  += -std=gnu11 -Wall -ggdb
 CFLAGS  += -fsanitize=undefined -fsanitize=address
+# CFLAGS  += -DDEBUG
 
 LDFLAGS = $(CFLAGS)
 LDFLAGS += -lfl -ly
@@ -20,7 +21,7 @@ GENERATED = $(INCLUDE_DIR)/syntax.tab.h $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.y
 
 SRCS = $(shell find $(SRC_DIR) -type f \
     \( -iname "*.c" -not \( -iname "*.yy.c" -or -iname "*.tab.c" \) \) )
-SRCS += $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.cs
+SRCS += $(SRC_DIR)/syntax.tab.c $(SRC_DIR)/lex.yy.c
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 CFLAGS += -iquote./$(INCLUDE_DIR)

@@ -25,10 +25,6 @@ static void __free() {
     }
 }
 
-static void __init() {
-    atexit(__free); // register cleanup function on exit
-}
-
 static void __newpool(size_t min_size) {
     size_t size = min_size;
     if (size < POOL_SIZE) size = POOL_SIZE;
@@ -40,9 +36,15 @@ static void __newpool(size_t min_size) {
     pool = newpool;
 }
 
+static void __init() {
+    atexit(__free); // register cleanup function on exit
+    __newpool(0);
+}
+
 static void *__alloc(size_t size) {
     if (!pool) __init();
     size_t chunk_size = sizeof(struct memchunk) + size;
+    if (chunk_size & 7) chunk_size = (chunk_size | 7) + 1;
     if (chunk_size > pool->remain) __newpool(chunk_size);
     struct memchunk *chunk = pool->ptr;
     chunk->size = size;
@@ -64,6 +66,7 @@ static void *__realloc(void *ptr, size_t newsize) {
 }
 
 void *palloc(size_t size) {
+    if (size == 0) return NULL;
     return __alloc(size);
 }
 

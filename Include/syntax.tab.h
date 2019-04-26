@@ -80,7 +80,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 43 "Code/syntax.y" /* yacc.c:1909  */
+#line 45 "Code/syntax.y" /* yacc.c:1909  */
 
     unsigned long int_val;
     float float_val;
@@ -89,6 +89,10 @@ union YYSTYPE
     enum BinaryOperator binaryop;
 
     struct Program *program;
+    struct {
+            FuncList funclist;
+            VarList varlist;
+    } extdef;
     struct Expression *expr;    
     struct Statement *stmt;
     StmtList stmtlist;
@@ -103,7 +107,7 @@ union YYSTYPE
     ArgList arglist;
     int dummy;
 
-#line 107 "Include/syntax.tab.h" /* yacc.c:1909  */
+#line 111 "Include/syntax.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

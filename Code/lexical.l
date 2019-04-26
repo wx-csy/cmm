@@ -174,7 +174,7 @@ return              {
                     }
 
 {identifier}        {
-                        yylval.name = yytext;
+                        yylval.name = strpdup(yytext);
                         return ID;
                     }
 

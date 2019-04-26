@@ -18,7 +18,9 @@
 #include "ast/function.h"
 #include "ast/type.h"
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "cmm.h"
 #include "error.h"
 
@@ -48,6 +50,10 @@ static Type *Specifier_Type = NULL;
     enum BinaryOperator binaryop;
 
     struct Program *program;
+    struct {
+            FuncList funclist;
+            VarList varlist;
+    } extdef;
     struct Expression *expr;    
     struct Statement *stmt;
     StmtList stmtlist;
@@ -64,7 +70,8 @@ static Type *Specifier_Type = NULL;
 }
 
 %define parse.error verbose
-%start  Program
+%start Program
+%type  <program> Program;
 %token <int_val>        INT
 %token <float_val>      FLOAT
 %token <name>           ID
@@ -83,7 +90,7 @@ static Type *Specifier_Type = NULL;
 %nonassoc   ELSE
 
 /* High-level Definitions */
-%type <dummy> Program ExtDefList ExtDef ExtDecList
+%type <extdef> ExtDefList ExtDef ExtDecList
 
 /* Specifiers */
 %type <type> Specifier StructSpecifier
@@ -92,7 +99,7 @@ static Type *Specifier_Type = NULL;
 /* Declarators */
 %type <vardec> VarDec
 %type <func> FunDec
-%type <varlist> VarList
+%type <varlist> VarList ParamList
 %type <var> ParamDec
 
 /* Statements */
@@ -105,31 +112,64 @@ static Type *Specifier_Type = NULL;
 
 /* Expressions */
 %type <expr> Exp
-%type <arglist> Args
+%type <arglist> Args ArgList
 
 %%
 
 // High level definitions
 
 Program : 
-      ExtDefList                        {  }
+                                        {
+            symtbl_push_scope(false);
+        }
+      ExtDefList                        {
+            symtbl_pop_scope();
+            $$ = Program_Constructor($ExtDefList.funclist, $ExtDefList.varlist);
+        }
     ;
 
 ExtDefList : 
-      ExtDef ExtDefList                 {  }
-    | %empty                            { }
+      ExtDef ExtDefList[old]            {
+            $$ = $old;
+            list_join(&$$.funclist, $old.funclist);
+            list_join(&$$.varlist, $old.varlist);
+        }
+    | %empty                            {
+            memset(&$$, 0, sizeof($$));
+        }
     ;
 
 ExtDef : 
-      Specifier ExtDecList ';'          {  }
-    | Specifier ';'                     {  }
-    | Specifier FunDec CompSt           {  }
-    | error                             {  }
+      Specifier ExtDecList ';'          {
+            $$ = $ExtDecList;
+        }
+    | Specifier ';'                     { }
+    | Specifier FunDec CompSt           {
+            $FunDec->rettype = $Specifier;
+            $FunDec->stmt = $CompSt;
+            symtbl_pop_scope();
+            memset(&$$, 0, sizeof($$));
+            list_prepend(&$$.funclist, $FunDec);
+        }
+    | error                             {
+            memset(&$$, 0, sizeof($$));
+        }
     ;
 
 ExtDecList :
-      VarDec                            {  }
-    | VarDec ',' ExtDecList             { }
+      VarDec                            {
+            memset(&$$, 0, sizeof($$));
+            *$VarDec.underlying = Specifier_Type;
+            Type_Array_Semantic_Finalize($VarDec.var->valtype);
+            list_prepend(&$$.varlist, $VarDec.var);
+               }
+    | VarDec ',' ExtDecList[old]        {
+            $$ = $old;
+            *$VarDec.underlying = Specifier_Type;
+            Type_Array_Semantic_Finalize($VarDec.var->valtype);
+            list_prepend(&$$.varlist, $VarDec.var);
+        }
+
     ;
 
 // Specifiers
@@ -137,18 +177,21 @@ ExtDecList :
 Specifier : 
       TYPE                              {
             $$ = Type_Basic_Constructor($TYPE);
+                  Specifier_Type = $Specifier;
         }
     | StructSpecifier                   {
             $$ = $StructSpecifier;
+                  Specifier_Type = $Specifier;
         }
     ;
 
 StructSpecifier : 
       STRUCT OptTag                     {
-      	    if ($OptTag) {
-            	$<type>$ = Type_Struct_Constructor($OptTag);
+            if ($OptTag) {
+                    $<type>$ = Type_Struct_Constructor(yylloc, $OptTag);
+
             } else {
-            	$<type>$ = Type_Struct_Constructor("<anonymous struct>");
+                    $<type>$ = Type_Struct_Constructor(yylloc, "<anonymous struct>");
             }
             symtbl_push_scope(true);
         } [structdef]
@@ -157,7 +200,8 @@ StructSpecifier :
             $$->varlist = $DefList;
             $$->symtable = symtbl_scope->variables;
             symtbl_pop_scope();
-            // TODO: insert to symtbl if tag is not empty
+            Type_Struct_Semantic_Finalize($$);
+            if ($OptTag) symtbl_struct_insert($OptTag, $$);
         }
     | STRUCT Tag                        {
             $$ = symtbl_struct_find($Tag);
@@ -177,24 +221,40 @@ Tag :
 
 VarDec : 
       ID                                {
-            $$.var = Variable_Constructor($ID, NULL);
+            $$.var = Variable_Constructor(yylloc, $ID);
             $$.underlying = &$$.var->valtype;
+            symtbl_variable_insert($ID, $VarDec.var);
         }
     | VarDec '[' INT ']'                {
             $$.var = $1.var;
             $$.underlying =  &(
-                *($1.underlying) = Type_Array_Constructor($INT, NULL)
+                *($1.underlying) = Type_Array_Constructor($INT)
             )->underlying;
         }
     ;
 
 FunDec : 
-      ID '(' VarList ')'                {
-            $$ = Function_Constructor($ID, yylloc, NULL, $VarList, NULL);
+      ID                                {
+            $<func>$ = Function_Constructor($ID, yylloc);
+            symtbl_function_insert($ID, $<func>$);
+            symtbl_push_scope(false);
+        }[func]
+      '(' ParamList ')'                 {
+            $$ = $<func>func;
+            $$->paramlist = $ParamList;
+
         }
     ;
 
-VarList : 
+ParamList :
+      VarList                           {
+            $$ = $VarList;
+        }
+    | %empty                            {
+            $$ = NULL;
+        }
+
+VarList : // ParamList
       ParamDec ',' VarList[old]         {
             $$ = $old;
             list_prepend(&$$, $ParamDec);
@@ -203,15 +263,13 @@ VarList :
             $$ = NULL;
             list_prepend(&$$, $ParamDec);
         }
-    | %empty                    	{
-            $$ = NULL;
-        }
     ;
 
 ParamDec : 
       Specifier VarDec                  {
             $$ = $VarDec.var;
             *($VarDec.underlying) = $Specifier;
+            Type_Array_Semantic_Finalize($$->valtype);
         }
     ;
 
@@ -238,9 +296,13 @@ Stmt :
             $$ = Statement_Expression_Constructor(yylloc, $Exp);
         }
     | error ';'                         {
-            $$ = NULL;  /* TODO: better error handling */
+            $$ = &Statement_Invalid;  /* TODO: better error handling */
         }
-    | CompSt                            { 
+    |                                   {
+            symtbl_push_scope(false);
+        }
+      CompSt                            {
+            symtbl_pop_scope();
             $$ = $CompSt;
         }
     | RETURN Exp ';'                    { 
@@ -270,10 +332,7 @@ DefList :
     ;
 
 Def : 
-      Specifier                {
-            Specifier_Type = $Specifier;
-        }
-      DecList ';'                       {
+      Specifier DecList ';'             {
             $$ = $DecList;
         }
     ;
@@ -293,10 +352,12 @@ Dec :
       VarDec                            {
             $$ = $VarDec.var;
             *$VarDec.underlying = Specifier_Type;
+            Type_Array_Semantic_Finalize($$->valtype);
         }
     | VarDec '=' Exp                    {
             $$ = $VarDec.var;
             *$VarDec.underlying = Specifier_Type;
+            Type_Array_Semantic_Finalize($$->valtype);
             if (symtbl_scope->is_struct_scope) {
                 cmm_error(CMM_ERROR_INIT_MEMBER, yylloc);
             } else {
@@ -361,8 +422,16 @@ Exp :
         }
     ;
 
-Args : // left recurision eases array list construction
-      Exp ',' Args[old]                 {
+Args :
+      ArgList                           {
+            $Args = $ArgList;
+        }
+    | %empty                            {
+            $Args = NULL;
+        }
+
+ArgList :
+      Exp ',' ArgList[old]              {
             $$ = $old;
             list_prepend(&$$, $Exp);
         }
@@ -370,9 +439,7 @@ Args : // left recurision eases array list construction
             $$ = NULL;
             list_prepend(&$$, $Exp);
         }
-    | %empty                    {
-            $$ = NULL;
-        }
+
     ;
 
 %%

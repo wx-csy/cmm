@@ -15,9 +15,10 @@ typedef declare_list_node(FuncList_node, Function *) FuncList_node, *FuncList;
 typedef declare_list_node(StmtList_node, Statement *) StmtList_node, *StmtList;
 typedef declare_list_node(ArgList_node, Expression *) ArgList_node, *ArgList;
 
-struct Program {
+typedef struct Program {
     FuncList funclist;
     VarList varlist;
-};
+} Program;
 
+Program *Program_Constructor(FuncList funclist, VarList varlist);
 #endif

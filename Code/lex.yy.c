@@ -989,7 +989,7 @@ case 17:
 YY_RULE_SETUP
 #line 176 "Code/lexical.l"
 {
-                        yylval.name = yytext;
+                        yylval.name = strpdup(yytext);
                         return ID;
                     }
 	YY_BREAK

@@ -22,7 +22,7 @@ void symtbl_init(symtbl *table);
 void *symtbl_find(symtbl *table, const char *name);
 
 /* Insert an element to symtbl. If name exists, return false. */
-bool symtbl_insert(symtbl* table, const char *name, void *item);
+bool symtbl_insert(symtbl *table, const char *name, void *item);
 
 /* Erase an element in symtbl. If name does not exist, return false. */
 /* Currently, we do not provide this function. */

@@ -3,12 +3,70 @@
 #include "ast/function.h"
 #include "ast/variable.h"
 
-static bool __check_binary_operand_type_mismatch(enum BinaryOperator op, Type *t1, Type *t2) {
-    // TODO:
+static inline Type *__get_binary_operand_return_type(cmm_loc_t location,
+        enum BinaryOperator op, Type *t1, Type *t2) {
+    if (t1->typector == TC_INVALID || t2->typector == TC_INVALID)
+        return &Type_Invalid;
+    switch (op) {
+    case BOP_ADD:
+    case BOP_MINUS:
+    case BOP_STAR:
+    case BOP_DIV:
+        if (!Type_Is_Basic(t1) || !Type_Compatible(t1, t2)) {
+            cmm_error(CMM_ERROR_OPERAND_TYPE_MISMATCH, location);
+            return &Type_Invalid;
+        }
+        return t1;
+    case BOP_GT:
+    case BOP_LT:
+    case BOP_GE:
+    case BOP_LE:
+    case BOP_EQU:
+    case BOP_NEQ:
+        if (!Type_Is_Basic(t1) || !Type_Compatible(t1, t2)) {
+            cmm_error(CMM_ERROR_OPERAND_TYPE_MISMATCH, location);
+            return &Type_Invalid;
+        }
+        return Type_Basic_Constructor(BT_INT);
+    case BOP_AND:
+    case BOP_OR:
+        if (!Type_Is_Int(t1) || !Type_Is_Int(t2)) {
+            cmm_error(CMM_ERROR_OPERAND_TYPE_MISMATCH, location);
+            return &Type_Invalid;
+        }
+        return Type_Basic_Constructor(BT_INT);
+    case BOP_ARRAY_ACCESS:
+        if (!Type_Is_Array(t1)) {
+            cmm_error(CMM_ERROR_INVSUB, location);
+            return &Type_Invalid;
+        }
+        if (!Type_Is_Int(t2))
+            cmm_error(CMM_ERROR_INVSUBTYPE, location);
+        return t1->underlying;
+    default:
+        assert(0);
+    }
 }
 
-static bool __check_unary_operand_type_mismatch(enum UnaryOperator op, Type *t) {
-    // TODO:
+static inline Type *__get_unary_operand_return_type(cmm_loc_t location,
+        enum UnaryOperator op, Type *t) {
+    if (t->typector == TC_INVALID) return t;
+    switch (op) {
+    case UOP_NEGATE:
+        if (!Type_Is_Basic(t)) {
+            cmm_error(CMM_ERROR_OPERAND_TYPE_MISMATCH, location);
+            return &Type_Invalid;
+        }
+        return t;
+    case UOP_NOT:
+        if (!Type_Is_Int(t)) {
+            cmm_error(CMM_ERROR_OPERAND_TYPE_MISMATCH, location);
+            return &Type_Invalid;
+        }
+        return Type_Basic_Constructor(BT_INT);
+    default:
+        assert(0);
+    }
 }
 
 
@@ -18,12 +76,10 @@ Expression *lhs, Expression *rhs) {
     Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_BINARY_EXPR;
     ret->location = location;
-    ret->valtype = lhs->valtype;
     ret->lvalue = false;
     ret->bop_type = optype;
-    if (__check_binary_operand_type_mismatch(optype, lhs->valtype, rhs->valtype))
-        cmm_error(CMM_ERROR_OPERAND_TYPE_MISMATCH, location);
-    ret->location = location;
+    ret->valtype = __get_binary_operand_return_type(location, optype,
+        lhs->valtype, rhs->valtype);
     ret->lhs = lhs;
     ret->rhs = rhs;
     return ret;
@@ -35,11 +91,9 @@ Expression *rhs) {
     Expression *ret = palloc(sizeof(Expression));
     ret->type = EXPR_UNARY_EXPR;
     ret->location = location;
-    ret->valtype = rhs->valtype;
     ret->lvalue = false;
     ret->uop_type = optype;
-    if (__check_unary_operand_type_mismatch(optype, rhs->valtype))
-        cmm_error(CMM_ERROR_OPERAND_TYPE_MISMATCH, location);
+    ret->valtype = __get_unary_operand_return_type(location, optype, rhs->valtype);
     ret->rhs = rhs;
     return ret;
 }

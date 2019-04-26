@@ -1,4 +1,8 @@
 #include <string.h>
+#include <stdio.h>
+#include "ast/type.h"
+#include "ast/function.h"
+#include "ast/variable.h"
 #include "cmm.h"
 #include "symtbl.h"
 
@@ -9,6 +13,9 @@ void symtbl_init(symtbl *table) {
 }
 
 void *symtbl_find(symtbl *table, const char *name) {
+#ifdef DEBUG
+    fprintf(stderr, "[symtbl] find in %p for '%s'\n", table, name);
+#endif
     for (symtbl entry = *table; entry; entry = entry->next) {
         if (strcmp(entry->data.name, name) == 0)
             return entry->data.item;
@@ -17,6 +24,9 @@ void *symtbl_find(symtbl *table, const char *name) {
 }
 
 bool symtbl_insert(symtbl *table, const char *name, void *item) {
+#ifdef DEBUG
+    fprintf(stderr, "[symtbl] insert to %p: ('%s', %p)\n", table, name, item);
+#endif
     if (symtbl_find(table, name)) return false;
     struct symtbl_entry entry = {name, item};
     list_prepend(table, entry);
@@ -57,7 +67,12 @@ Function *symtbl_function_find(const char *name) {
 }
 
 bool symtbl_function_insert(const char *name, Function *func) {
-    return symtbl_insert(&symtbl_scope->functions, name, func);
+#ifdef DEBUG
+    fprintf(stderr, "[symtbl] function insert: ('%s', %p)\n", name, func);
+#endif
+    bool ret = symtbl_insert(&symtbl_scope->functions, name, func);
+    if (!ret) cmm_error(CMM_ERROR_REDEF_FUNC, func->location, name);
+    return ret;
 }
 
 Variable *symtbl_variable_find(const char *name) {
@@ -69,7 +84,18 @@ Variable *symtbl_variable_find(const char *name) {
 }
 
 bool symtbl_variable_insert(const char *name, Variable *var) {
-    return symtbl_insert(&symtbl_scope->variables, name, var);
+#ifdef DEBUG
+    fprintf(stderr, "[symtbl] variable insert: ('%s', %p)\n", name, var);
+#endif
+    bool ret = symtbl_insert(&symtbl_scope->variables, name, var);
+    if (!ret) {
+        if (symtbl_scope->is_struct_scope) {
+            cmm_error(CMM_ERROR_REDEF_MEMBER, var->location, name);
+        } else {
+            cmm_error(CMM_ERROR_REDEF_VAR, var->location, name);
+        }
+    }
+    return ret;
 }
 
 Type *symtbl_struct_find(const char *name) {
@@ -81,5 +107,7 @@ Type *symtbl_struct_find(const char *name) {
 }
 
 bool symtbl_struct_insert(const char *name, Type *type) {
-    return symtbl_insert(&symtbl_scope->structs, name, type);
+    bool ret = symtbl_insert(&symtbl_scope->structs, name, type);
+    if (!ret) cmm_error(CMM_ERROR_REDEF_STRUCT, type->location, name);
+    return ret;
 }

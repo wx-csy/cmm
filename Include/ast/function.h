@@ -12,6 +12,5 @@ typedef struct Function {
     Statement *stmt;
 } Function;
 
-Function *Function_Constructor(const char *name, cmm_loc_t location,
-    Type *rettype, VarList paramlist, Statement *stmt);
+Function *Function_Constructor(const char *name, cmm_loc_t location);
 #endif

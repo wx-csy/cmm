@@ -6,6 +6,7 @@
 #include "location.h"
 
 typedef enum StmtType {
+    STMT_INVALID,
     STMT_COMPOUND,
     STMT_EXPRESSION,
     STMT_RETURN,
@@ -40,6 +41,8 @@ typedef struct Statement {
         };
     };
 } Statement;
+
+extern Statement Statement_Invalid;
 
 Statement *
 Statement_Compound_Constructor(cmm_loc_t location, VarList varlist, StmtList stmtlist);
