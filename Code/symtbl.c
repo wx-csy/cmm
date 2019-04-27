@@ -16,10 +16,9 @@ void *symtbl_find(symtbl *table, const char *name) {
 #ifdef DEBUG
     fprintf(stderr, "[symtbl] find in %p for '%s'\n", table, name);
 #endif
-    for (symtbl entry = *table; entry; entry = entry->next) {
+    for (symtbl entry = *table; entry; entry = entry->next)
         if (strcmp(entry->data.name, name) == 0)
             return entry->data.item;
-    }
     return NULL;
 }
 
@@ -58,12 +57,23 @@ void symtbl_pop_scope() {
     symtbl_scope = symtbl_scope->prev;
 }
 
-Function *symtbl_function_find(const char *name, cmm_loc_t location) {
+Function *symtbl_function_try_find(const char *name) {
     for (struct symscope *cur = symtbl_scope; cur; cur = cur->prev) {
         struct Function *result = symtbl_find(&cur->functions, name);
         if (result) return result;
     }
-    cmm_error(CMM_ERROR_UNDEF_FUNC, location, name);
+    return NULL;
+}
+
+
+Function *symtbl_function_find(const char *name, cmm_loc_t location) {
+    Function *res = symtbl_function_try_find(name);
+    if (res) return res;
+    if (symtbl_variable_try_find(name)) {
+        cmm_error(CMM_ERROR_INVCALL, location, name);
+    } else {
+        cmm_error(CMM_ERROR_UNDEF_FUNC, location, name);
+    }
     return &Function_Invalid;
 }
 
@@ -76,11 +86,17 @@ bool symtbl_function_insert(const char *name, Function *func) {
     return ret;
 }
 
-Variable *symtbl_variable_find(const char *name, cmm_loc_t location) {
+Variable *symtbl_variable_try_find(const char *name) {
     for (struct symscope *cur = symtbl_scope; cur; cur = cur->prev) {
         struct Variable *result = symtbl_find(&cur->variables, name);
         if (result) return result;
     }
+    return NULL;
+}
+
+Variable *symtbl_variable_find(const char *name, cmm_loc_t location) {
+    Variable *ret = symtbl_variable_try_find(name);
+    if (ret) return ret;
     cmm_error(CMM_ERROR_UNDEF_VAR, location, name);
     return &Variable_Invalid;
 }
@@ -100,11 +116,18 @@ bool symtbl_variable_insert(const char *name, Variable *var) {
     return ret;
 }
 
-Type *symtbl_struct_find(const char *name, cmm_loc_t location) {
+Type *symtbl_struct_try_find(const char *name) {
     for (struct symscope *cur = symtbl_scope; cur; cur = cur->prev) {
         struct Type *result = symtbl_find(&cur->structs, name);
         if (result) return result;
     }
+    return NULL;
+}
+
+
+Type *symtbl_struct_find(const char *name, cmm_loc_t location) {
+    Type *ret = symtbl_struct_try_find(name);
+    if (ret) return ret;
     cmm_error(CMM_ERROR_UNDEF_STRUCT, location, name);
     return &Type_Invalid;
 }

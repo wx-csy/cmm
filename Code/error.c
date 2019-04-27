@@ -33,7 +33,7 @@ static const char *errmsg[65536] = {
     [CMM_ERROR_ARG_TYPE_MISMATCH] = "function argument type mismatch",
     [CMM_ERROR_ARG_NUMBER_MISMATCH] = "function argument number mismatch",
     [CMM_ERROR_INVSUB]      = "subscript to non-array type",
-    [CMM_ERROR_INVCALL]     = "call to non-function object",
+    [CMM_ERROR_INVCALL]     = "undefined function '%s' (maybe misdefined as variable?)",
     [CMM_ERROR_INVSUBTYPE]  = "array subscript is not an integer",
     [CMM_ERROR_MEMBER_NONSTRUCT] = "member access of non-struct type",
     [CMM_ERROR_UNDEF_MEMBER] = "'struct %s' has no member named '%s'",
@@ -41,7 +41,7 @@ static const char *errmsg[65536] = {
     [CMM_ERROR_INIT_MEMBER]  = "initialization within struct not allowed",
     [CMM_ERROR_REDEF_STRUCT] = "redefinition of 'struct %s'",
     [CMM_ERROR_UNDEF_STRUCT] = "undefined 'struct %s'"
- };
+};
 
 static const char *errfmt[16] = {
     [0]                     = "system error: ",

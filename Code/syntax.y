@@ -72,7 +72,7 @@ static Function *Current_Function = NULL;
 
 %define parse.error verbose
 %start Program
-%type  <program> Program;
+%type  <program> Program
 %token <int_val>        INT
 %token <float_val>      FLOAT
 %token <name>           ID
@@ -132,8 +132,8 @@ Program :
 ExtDefList : 
       ExtDef ExtDefList[old]            {
             $$ = $old;
-            list_join(&$$.funclist, $old.funclist);
-            list_join(&$$.varlist, $old.varlist);
+            list_join(&$$.funclist, $ExtDef.funclist);
+            list_join(&$$.varlist, $ExtDef.varlist);
         }
     | %empty                            {
             memset(&$$, 0, sizeof($$));
@@ -144,7 +144,9 @@ ExtDef :
       Specifier ExtDecList ';'          {
             $$ = $ExtDecList;
         }
-    | Specifier ';'                     { }
+    | Specifier ';'                     {
+            memset(&$$, 0, sizeof($$));
+        }
     | Specifier FunDec                  {
             $FunDec->rettype = $Specifier;
         }
