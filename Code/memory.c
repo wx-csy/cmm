@@ -68,7 +68,7 @@ static void *__alloc(size_t size) {
 
 static void *__realloc(void *ptr, size_t newsize) {
     // void pointer arithmetic is a GCC extension
-    struct memchunk *chunk = ptr - sizeof(struct mempool);
+    struct memchunk *chunk = ptr - sizeof(struct memchunk);
     if (chunk->size >= newsize) {
         chunk->size = newsize;
     } else {
@@ -84,6 +84,7 @@ void *palloc(size_t size) {
 }
 
 void *pzalloc(size_t size) {
+    if (size == 0) return NULL;
     void *ptr = __alloc(size);
     memset(ptr, 0, size);
     return ptr;
