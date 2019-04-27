@@ -26,9 +26,18 @@ bool Type_Compatible(Type *type1, Type *type2) {
         return type1->basictype == type2->basictype;
     case TC_ARRAY:
         return Type_Compatible(type1->underlying, type2->underlying);
-    case TC_STRUCT:
-        // TODO: This is name equivalence
-        return type1 == type2;
+    case TC_STRUCT: {
+        /* // This is name equivalence
+            return type1 == type2;
+         */
+        // structural equivalence (memberwise equivalence)
+            VarList list1 = type1->varlist, list2 = type2->varlist;
+            for (; list1 && list2; list1 = list1->next, list2 = list2->next)
+                if (!Type_Compatible(list1->data->valtype, list2->data->valtype))
+                    return false;
+            if (list1 || list2) return false;
+            return true;
+        }
     default:
         assert(0);
     }

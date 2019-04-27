@@ -14,5 +14,6 @@ typedef struct Function {
 
 extern Function Function_Invalid;
 
-Function *Function_Constructor(const char *name, cmm_loc_t location);
+Function *Function_Constructor(const char *name, cmm_loc_t location, Type *rettype);
+bool Function_Declaration_Compatible(Function *func1, Function *func2);
 #endif

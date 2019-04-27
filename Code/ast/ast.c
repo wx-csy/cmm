@@ -1,4 +1,5 @@
 #include "ast/ast.h"
+#include "ast/function.h"
 #include "cmm.h"
 
 Program *Program_Constructor(FuncList funclist, VarList varlist) {

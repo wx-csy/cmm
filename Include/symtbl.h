@@ -34,22 +34,29 @@ bool symtbl_erase(symtbl* table, const char *name);
 struct symscope {
     bool is_struct_scope;
     symtbl variables;
-    symtbl functions;
     symtbl structs;
     struct symscope *prev;
 };
 
 extern struct symscope *symtbl_scope;
+extern symtbl symtbl_functions;
 
 /* Create a new scope for name lookup. */
 void symtbl_push_scope(bool is_struct_scope);
 
-/* Restore the old scope for name lookup */
+/* Restore the old scope for name lookup. */
 void symtbl_pop_scope();
 
+/* Check if 'name' exists in current scope. */
+bool symtbl_current_exist(const char *name);
 Function *symtbl_function_try_find(const char *name);
 Function *symtbl_function_find(const char *name, cmm_loc_t location);
+/* Declare a function named 'name'. */
+bool symtbl_declare_function(const char *name, Function *func);
+/* Define a function named 'name'. */
+bool symtbl_define_function(Function *func);
 bool symtbl_function_insert(const char *name, Function *func);
+bool symtbl_function_finalize(void);
 Variable *symtbl_variable_try_find(const char *name);
 Variable *symtbl_variable_find(const char *name, cmm_loc_t location);
 bool symtbl_variable_insert(const char *name, Variable *var);

@@ -46,6 +46,9 @@ enum CMM_ERROR_NO {
     CMM_ERROR_INIT_MEMBER   = 3151,
     CMM_ERROR_REDEF_STRUCT  = 3160,
     CMM_ERROR_UNDEF_STRUCT  = 3170,
+
+    CMM_ERROR_DECFUNC_UNDEF = 3180,
+    CMM_ERROR_FUNC_DEC_MISMATCH = 3190,
 };
 
 void cmm_error(int cmm_errno, cmm_loc_t loc, ...);

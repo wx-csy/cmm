@@ -125,6 +125,7 @@ Program :
         }
       ExtDefList                        {
             symtbl_pop_scope();
+            symtbl_function_finalize();
             $$ = Program_Constructor($ExtDefList.funclist, $ExtDefList.varlist);
         }
     ;
@@ -147,14 +148,18 @@ ExtDef :
     | Specifier ';'                     {
             memset(&$$, 0, sizeof($$));
         }
-    | Specifier FunDec                  {
-            $FunDec->rettype = $Specifier;
-        }
-      CompSt                            {
+    | FunDec CompSt                     {
+            // function definition
             $FunDec->stmt = $CompSt;
             symtbl_pop_scope();
             memset(&$$, 0, sizeof($$));
+            symtbl_define_function($FunDec);
             list_prepend(&$$.funclist, $FunDec);
+        }
+    | FunDec ';'                        {
+            // function declaration
+            symtbl_pop_scope();
+            memset(&$$, 0, sizeof($$));
         }
     | error                             {
             memset(&$$, 0, sizeof($$));
@@ -239,16 +244,16 @@ VarDec :
     ;
 
 FunDec : 
-      ID                                {
-            $<func>$ = Function_Constructor($ID, yylloc);
+      Specifier ID                      {
+            $<func>$ = Function_Constructor($ID, yylloc, $Specifier);
             Current_Function = $<func>$;
-            symtbl_function_insert($ID, $<func>$);
             symtbl_push_scope(false);
         }[func]
       '(' ParamList ')'                 {
             $$ = $<func>func;
             $$->paramlist = $ParamList;
-
+            symtbl_declare_function($ID, $<func>$);
+            $$ = memcpy(pzalloc(sizeof(Function)), $<func>func, sizeof(Function));
         }
     ;
 

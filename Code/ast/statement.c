@@ -27,12 +27,11 @@ Statement_Expression_Constructor(cmm_loc_t location, Expression *expr) {
 Statement *
 Statement_Return_Constructor(cmm_loc_t location, Expression *expr, Function *func) {
     Statement *ret = palloc(sizeof(Statement));
-    // TODO: add return type check
     ret->type = STMT_RETURN;
     ret->location = location;
     ret->expr = expr;
     ret->func = func;
-    if (!Type_Compatible(expr->valtype, func->rettype))
+    if (!Type_Compatible(func->rettype, expr->valtype))
         cmm_error(CMM_ERROR_RETURN_TYPE_MISMATCH, location);
     return ret;
 }
