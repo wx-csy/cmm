@@ -1,5 +1,5 @@
-#ifndef __CONTAINER_ARRAY__
-#define __CONTAINER_ARRAY__
+#ifndef __CONTAINER_ARRAY_H__
+#define __CONTAINER_ARRAY_H__
 
 #include "memory.h"
 

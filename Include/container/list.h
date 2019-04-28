@@ -1,5 +1,5 @@
-#ifndef __CONTAINER_LIST__
-#define __CONTAINER_LIST__
+#ifndef __CONTAINER_LIST_H__
+#define __CONTAINER_LIST_H__
 
 #include "memory.h"
 
@@ -8,6 +8,9 @@
         tmember data;                                                       \
         struct tname *next;                                                 \
     }
+
+#define list_foreach(list, iter)                                            \
+    for (typeof(list) iter = (list); iter; iter = iter->next)
 
 #define list_prepend(plist, elem)                                           \
     do {                                                                    \

@@ -16,7 +16,7 @@ void *symtbl_find(symtbl *table, const char *name) {
 #ifdef DEBUG
     fprintf(stderr, "[symtbl] find in %p for '%s'\n", table, name);
 #endif
-    for (symtbl entry = *table; entry; entry = entry->next)
+    list_foreach(*table, entry)
         if (strcmp(entry->data.name, name) == 0)
             return entry->data.item;
     return NULL;
