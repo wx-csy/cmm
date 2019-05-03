@@ -8,7 +8,7 @@ extern size_t cmm_nr_error;
 
 enum CMM_ERROR_NO {
     // system error
-    CMM_ERROR_FILEERROR         = 0001,
+    CMM_ERROR_FILEERROR         =    1,
 
     // lexical error
     CMM_ERROR_UNTERMCOMM        = 1010,

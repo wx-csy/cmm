@@ -6,7 +6,7 @@
 size_t cmm_nr_error = 0;
 
 static const char *errmsg[65536] = {
-    [CMM_ERROR_FILEERROR]   = "unable to open file '%s'",
+    [CMM_ERROR_FILEERROR]   = "cannot open file '%s'",
 
     [CMM_ERROR_UNTERMCOMM]  = "unterminated comment",
     [CMM_ERROR_MYSCHAR]     = "mysterious character '%s'",

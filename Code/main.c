@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include "error.h"
 #include "cmm.h"
+#include "ast/ast.h"
+#include "ast/function.h"
+
+Program program;
 
 int main(int argc, char *argv[]) {
     if (argc > 1) {
@@ -10,9 +14,10 @@ int main(int argc, char *argv[]) {
         }
     }
     yyparse();
-    if (cmm_nr_error == 0) {
-        
-    }
+    /* lexical, syntax or semantics error */
+    if (cmm_nr_error != 0) return EXIT_FAILURE;
+    for (FuncList func = program.funclist; func; func = func->next)
+        Function_IR_Generate_Declaration(func->data);
     return 0;
 }
 

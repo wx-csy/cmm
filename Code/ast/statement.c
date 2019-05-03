@@ -73,3 +73,11 @@ Statement_While_Constructor(cmm_loc_t location, Expression *while_cond, Statemen
     ret->while_body = while_body;
     return ret;
 }
+
+void Statement_IR_Generate_Declaration(Statement *stmt) {
+    if (stmt->type != STMT_COMPOUND) return;
+    for (VarList var = stmt->varlist; var; var = var->next)
+        Variable_IR_Generate_Declaration(var->data, false);
+    for (StmtList subst = stmt->stmtlist; subst; subst = subst->next)
+        Statement_IR_Generate_Declaration(subst->data);
+}

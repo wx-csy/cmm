@@ -66,4 +66,6 @@ Statement_IfThenElse_Constructor(cmm_loc_t location,
 Statement *
 Statement_While_Constructor(cmm_loc_t location, Expression *while_cond, Statement *while_body);
 
+void Statement_IR_Generate_Declaration(Statement *stmt);
+
 #endif

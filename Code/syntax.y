@@ -127,6 +127,7 @@ Program :
             symtbl_pop_scope();
             symtbl_function_finalize();
             $$ = Program_Constructor($ExtDefList.funclist, $ExtDefList.varlist);
+            program = *$$;
         }
     ;
 

@@ -25,7 +25,7 @@ bool Type_Compatible(Type *type1, Type *type2) {
     case TC_BASIC:
         return type1->basictype == type2->basictype;
     case TC_ARRAY:
-        return Type_Compatible(type1->underlying, type2->underlying);
+        return Type_Compatible(type1->underlying, type2->underlying) && type1->extent == type2->extent;
     case TC_STRUCT: {
         /* // This is name equivalence
             return type1 == type2;

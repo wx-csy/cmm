@@ -509,13 +509,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   123,   123,   123,   134,   139,   145,   148,   151,   159,
-     164,   170,   176,   188,   192,   199,   199,   216,   222,   223,
-     227,   233,   238,   247,   247,   261,   264,   269,   273,   280,
-     290,   296,   300,   306,   309,   312,   312,   319,   322,   325,
-     328,   336,   340,   346,   352,   356,   363,   368,   368,   385,
-     388,   391,   394,   397,   400,   403,   406,   409,   412,   415,
-     418,   421,   424,   427,   430,   433,   439,   442,   447,   451
+       0,   123,   123,   123,   135,   140,   146,   149,   152,   160,
+     165,   171,   177,   189,   193,   200,   200,   217,   223,   224,
+     228,   234,   239,   248,   248,   262,   265,   270,   274,   281,
+     291,   297,   301,   307,   310,   313,   313,   320,   323,   326,
+     329,   337,   341,   347,   353,   357,   364,   369,   369,   386,
+     389,   392,   395,   398,   401,   404,   407,   410,   413,   416,
+     419,   422,   425,   428,   431,   434,   440,   443,   448,   452
 };
 #endif
 
@@ -1398,46 +1398,47 @@ yyreduce:
             symtbl_pop_scope();
             symtbl_function_finalize();
             (yyval.program) = Program_Constructor((yyvsp[0].extdef).funclist, (yyvsp[0].extdef).varlist);
+            program = *(yyval.program);
         }
-#line 1403 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1404 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 134 "Code/syntax.y" /* yacc.c:1646  */
+#line 135 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.extdef) = (yyvsp[0].extdef);
             list_join(&(yyval.extdef).funclist, (yyvsp[-1].extdef).funclist);
             list_join(&(yyval.extdef).varlist, (yyvsp[-1].extdef).varlist);
         }
-#line 1413 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1414 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 139 "Code/syntax.y" /* yacc.c:1646  */
+#line 140 "Code/syntax.y" /* yacc.c:1646  */
     {
             memset(&(yyval.extdef), 0, sizeof((yyval.extdef)));
         }
-#line 1421 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1422 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 145 "Code/syntax.y" /* yacc.c:1646  */
+#line 146 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.extdef) = (yyvsp[-1].extdef);
         }
-#line 1429 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1430 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 148 "Code/syntax.y" /* yacc.c:1646  */
+#line 149 "Code/syntax.y" /* yacc.c:1646  */
     {
             memset(&(yyval.extdef), 0, sizeof((yyval.extdef)));
         }
-#line 1437 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1438 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 151 "Code/syntax.y" /* yacc.c:1646  */
+#line 152 "Code/syntax.y" /* yacc.c:1646  */
     {
             // function definition
             (yyvsp[-1].func)->stmt = (yyvsp[0].stmt);
@@ -1446,69 +1447,69 @@ yyreduce:
             symtbl_define_function((yyvsp[-1].func));
             list_prepend(&(yyval.extdef).funclist, (yyvsp[-1].func));
         }
-#line 1450 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1451 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 159 "Code/syntax.y" /* yacc.c:1646  */
+#line 160 "Code/syntax.y" /* yacc.c:1646  */
     {
             // function declaration
             symtbl_pop_scope();
             memset(&(yyval.extdef), 0, sizeof((yyval.extdef)));
         }
-#line 1460 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1461 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 164 "Code/syntax.y" /* yacc.c:1646  */
+#line 165 "Code/syntax.y" /* yacc.c:1646  */
     {
             memset(&(yyval.extdef), 0, sizeof((yyval.extdef)));
         }
-#line 1468 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1469 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 170 "Code/syntax.y" /* yacc.c:1646  */
+#line 171 "Code/syntax.y" /* yacc.c:1646  */
     {
             memset(&(yyval.extdef), 0, sizeof((yyval.extdef)));
             *(yyvsp[0].vardec).underlying = Specifier_Type;
             Type_Array_Semantic_Finalize((yyvsp[0].vardec).var->valtype);
             list_prepend(&(yyval.extdef).varlist, (yyvsp[0].vardec).var);
                }
-#line 1479 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1480 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 176 "Code/syntax.y" /* yacc.c:1646  */
+#line 177 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.extdef) = (yyvsp[0].extdef);
             *(yyvsp[-2].vardec).underlying = Specifier_Type;
             Type_Array_Semantic_Finalize((yyvsp[-2].vardec).var->valtype);
             list_prepend(&(yyval.extdef).varlist, (yyvsp[-2].vardec).var);
         }
-#line 1490 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1491 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 188 "Code/syntax.y" /* yacc.c:1646  */
+#line 189 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.type) = Type_Basic_Constructor((yyvsp[0].basictype));
                   Specifier_Type = (yyval.type);
         }
-#line 1499 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1500 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 192 "Code/syntax.y" /* yacc.c:1646  */
+#line 193 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.type) = (yyvsp[0].type);
                   Specifier_Type = (yyval.type);
         }
-#line 1508 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1509 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 199 "Code/syntax.y" /* yacc.c:1646  */
+#line 200 "Code/syntax.y" /* yacc.c:1646  */
     {
             if ((yyvsp[0].name)) {
                     (yyval.type) = Type_Struct_Constructor(yylloc, (yyvsp[0].name));
@@ -1518,11 +1519,11 @@ yyreduce:
             }
             symtbl_push_scope(true);
         }
-#line 1522 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1523 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 208 "Code/syntax.y" /* yacc.c:1646  */
+#line 209 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.type) = (yyvsp[-3].type);
             (yyval.type)->varlist = (yyvsp[-1].varlist);
@@ -1531,275 +1532,275 @@ yyreduce:
             Type_Struct_Semantic_Finalize((yyval.type));
             if ((yyvsp[-4].name)) symtbl_struct_insert((yyvsp[-4].name), (yyval.type));
         }
-#line 1535 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1536 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 216 "Code/syntax.y" /* yacc.c:1646  */
+#line 217 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.type) = symtbl_struct_find((yyvsp[0].name), yylloc);
         }
-#line 1543 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1544 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 222 "Code/syntax.y" /* yacc.c:1646  */
+#line 223 "Code/syntax.y" /* yacc.c:1646  */
     { (yyval.name) = (yyvsp[0].name); }
-#line 1549 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1550 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 223 "Code/syntax.y" /* yacc.c:1646  */
+#line 224 "Code/syntax.y" /* yacc.c:1646  */
     { (yyval.name) = NULL; }
-#line 1555 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1556 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 227 "Code/syntax.y" /* yacc.c:1646  */
+#line 228 "Code/syntax.y" /* yacc.c:1646  */
     { (yyval.name) = (yyvsp[0].name); }
-#line 1561 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1562 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 233 "Code/syntax.y" /* yacc.c:1646  */
+#line 234 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.vardec).var = Variable_Constructor(yylloc, (yyvsp[0].name));
             (yyval.vardec).underlying = &(yyval.vardec).var->valtype;
             symtbl_variable_insert((yyvsp[0].name), (yyval.vardec).var);
         }
-#line 1571 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1572 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 238 "Code/syntax.y" /* yacc.c:1646  */
+#line 239 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.vardec).var = (yyvsp[-3].vardec).var;
             (yyval.vardec).underlying =  &(
                 *((yyvsp[-3].vardec).underlying) = Type_Array_Constructor((yyvsp[-1].int_val))
             )->underlying;
         }
-#line 1582 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1583 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 247 "Code/syntax.y" /* yacc.c:1646  */
+#line 248 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.func) = Function_Constructor((yyvsp[0].name), yylloc, (yyvsp[-1].type));
             Current_Function = (yyval.func);
             symtbl_push_scope(false);
         }
-#line 1592 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1593 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 252 "Code/syntax.y" /* yacc.c:1646  */
+#line 253 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.func) = (yyvsp[-3].func);
             (yyval.func)->paramlist = (yyvsp[-1].varlist);
             symtbl_declare_function((yyvsp[-4].name), (yyval.func));
             (yyval.func) = memcpy(pzalloc(sizeof(Function)), (yyvsp[-3].func), sizeof(Function));
         }
-#line 1603 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1604 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 261 "Code/syntax.y" /* yacc.c:1646  */
+#line 262 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = (yyvsp[0].varlist);
         }
-#line 1611 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1612 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 264 "Code/syntax.y" /* yacc.c:1646  */
+#line 265 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = NULL;
         }
-#line 1619 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1620 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 269 "Code/syntax.y" /* yacc.c:1646  */
+#line 270 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = (yyvsp[0].varlist);
             list_prepend(&(yyval.varlist), (yyvsp[-2].var));
         }
-#line 1628 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1629 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 273 "Code/syntax.y" /* yacc.c:1646  */
+#line 274 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = NULL;
             list_prepend(&(yyval.varlist), (yyvsp[0].var));
         }
-#line 1637 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1638 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 280 "Code/syntax.y" /* yacc.c:1646  */
+#line 281 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.var) = (yyvsp[0].vardec).var;
             *((yyvsp[0].vardec).underlying) = (yyvsp[-1].type);
             Type_Array_Semantic_Finalize((yyval.var)->valtype);
         }
-#line 1647 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1648 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 290 "Code/syntax.y" /* yacc.c:1646  */
+#line 291 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.stmt) = Statement_Compound_Constructor(yylloc, (yyvsp[-2].varlist), (yyvsp[-1].stmtlist));
         }
-#line 1655 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1656 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 296 "Code/syntax.y" /* yacc.c:1646  */
+#line 297 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.stmtlist) = (yyvsp[0].stmtlist);
             list_prepend(&(yyval.stmtlist), (yyvsp[-1].stmt));
         }
-#line 1664 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1665 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 300 "Code/syntax.y" /* yacc.c:1646  */
+#line 301 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.stmtlist) = NULL;
         }
-#line 1672 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1673 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 306 "Code/syntax.y" /* yacc.c:1646  */
+#line 307 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.stmt) = Statement_Expression_Constructor(yylloc, (yyvsp[-1].expr));
         }
-#line 1680 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1681 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 309 "Code/syntax.y" /* yacc.c:1646  */
+#line 310 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.stmt) = &Statement_Invalid;  /* TODO: better error handling */
         }
-#line 1688 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1689 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 312 "Code/syntax.y" /* yacc.c:1646  */
+#line 313 "Code/syntax.y" /* yacc.c:1646  */
     {
             symtbl_push_scope(false);
         }
-#line 1696 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1697 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 315 "Code/syntax.y" /* yacc.c:1646  */
+#line 316 "Code/syntax.y" /* yacc.c:1646  */
     {
             symtbl_pop_scope();
             (yyval.stmt) = (yyvsp[0].stmt);
         }
-#line 1705 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1706 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 319 "Code/syntax.y" /* yacc.c:1646  */
+#line 320 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.stmt) = Statement_Return_Constructor(yylloc, (yyvsp[-1].expr), Current_Function);
         }
-#line 1713 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1714 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 322 "Code/syntax.y" /* yacc.c:1646  */
+#line 323 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.stmt) = Statement_IfThen_Constructor(yylloc, (yyvsp[-2].expr), (yyvsp[0].stmt));
         }
-#line 1721 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1722 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 325 "Code/syntax.y" /* yacc.c:1646  */
+#line 326 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.stmt) = Statement_IfThenElse_Constructor(yylloc, (yyvsp[-4].expr), (yyvsp[-2].stmt), (yyvsp[0].stmt));
         }
-#line 1729 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1730 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 328 "Code/syntax.y" /* yacc.c:1646  */
+#line 329 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.stmt) = Statement_While_Constructor(yylloc, (yyvsp[-2].expr), (yyvsp[0].stmt));
         }
-#line 1737 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1738 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 336 "Code/syntax.y" /* yacc.c:1646  */
+#line 337 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = (yyvsp[-1].varlist);
             list_join(&(yyval.varlist), (yyvsp[0].varlist));
         }
-#line 1746 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1747 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 340 "Code/syntax.y" /* yacc.c:1646  */
+#line 341 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = NULL;
         }
-#line 1754 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1755 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 346 "Code/syntax.y" /* yacc.c:1646  */
+#line 347 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = (yyvsp[-1].varlist);
         }
-#line 1762 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1763 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 352 "Code/syntax.y" /* yacc.c:1646  */
+#line 353 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = NULL;
             list_prepend(&(yyval.varlist), (yyvsp[0].var));
         }
-#line 1771 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1772 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 356 "Code/syntax.y" /* yacc.c:1646  */
+#line 357 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.varlist) = (yyvsp[0].varlist);
             list_prepend(&(yyval.varlist), (yyvsp[-2].var));
         }
-#line 1780 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1781 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 363 "Code/syntax.y" /* yacc.c:1646  */
+#line 364 "Code/syntax.y" /* yacc.c:1646  */
     {
             *(yyvsp[0].vardec).underlying = Specifier_Type;
             Type_Array_Semantic_Finalize((yyvsp[0].vardec).var->valtype);
             (yyval.var) = (yyvsp[0].vardec).var;
         }
-#line 1790 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1791 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 368 "Code/syntax.y" /* yacc.c:1646  */
+#line 369 "Code/syntax.y" /* yacc.c:1646  */
     {
             *(yyvsp[-1].vardec).underlying = Specifier_Type;
             Type_Array_Semantic_Finalize((yyvsp[-1].vardec).var->valtype);
         }
-#line 1799 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1800 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 372 "Code/syntax.y" /* yacc.c:1646  */
+#line 373 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.var) = (yyvsp[-3].vardec).var;
             if (symtbl_scope->is_struct_scope) {
@@ -1808,181 +1809,181 @@ yyreduce:
                 Variable_Add_Initializer((yyval.var), (yyvsp[0].expr));
             }
         }
-#line 1812 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1813 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 385 "Code/syntax.y" /* yacc.c:1646  */
+#line 386 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_Assign_Constructor(yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1820 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1821 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 388 "Code/syntax.y" /* yacc.c:1646  */
+#line 389 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_Binary_Constructor(BOP_AND, yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1828 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1829 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 391 "Code/syntax.y" /* yacc.c:1646  */
+#line 392 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_Binary_Constructor(BOP_OR, yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1836 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1837 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 394 "Code/syntax.y" /* yacc.c:1646  */
+#line 395 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_Binary_Constructor((yyvsp[-1].binaryop), yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1844 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1845 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 397 "Code/syntax.y" /* yacc.c:1646  */
+#line 398 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_Binary_Constructor(BOP_ADD, yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1852 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1853 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 400 "Code/syntax.y" /* yacc.c:1646  */
+#line 401 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_Binary_Constructor(BOP_MINUS, yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1860 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1861 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 403 "Code/syntax.y" /* yacc.c:1646  */
+#line 404 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_Binary_Constructor(BOP_STAR, yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1868 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1869 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 406 "Code/syntax.y" /* yacc.c:1646  */
+#line 407 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_Binary_Constructor(BOP_DIV, yylloc, (yyvsp[-2].expr), (yyvsp[0].expr));
         }
-#line 1876 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1877 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 409 "Code/syntax.y" /* yacc.c:1646  */
+#line 410 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = (yyvsp[-1].expr);
         }
-#line 1884 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1885 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 412 "Code/syntax.y" /* yacc.c:1646  */
+#line 413 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_Unary_Constructor(UOP_NEGATE, yylloc, (yyvsp[0].expr));
         }
-#line 1892 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1893 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 415 "Code/syntax.y" /* yacc.c:1646  */
+#line 416 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_Unary_Constructor(UOP_NOT, yylloc, (yyvsp[0].expr));
         }
-#line 1900 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1901 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 418 "Code/syntax.y" /* yacc.c:1646  */
+#line 419 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.expr) = Expression_FuncCall_Constructor(yylloc, (yyvsp[-3].name), (yyvsp[-1].arglist));
         }
-#line 1908 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1909 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 421 "Code/syntax.y" /* yacc.c:1646  */
+#line 422 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_Binary_Constructor(BOP_ARRAY_ACCESS, yylloc, (yyvsp[-3].expr), (yyvsp[-1].expr));
         }
-#line 1916 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1917 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 424 "Code/syntax.y" /* yacc.c:1646  */
+#line 425 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_MemberAccess_Constructor(yylloc, (yyvsp[-2].expr), (yyvsp[0].name));
         }
-#line 1924 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1925 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 427 "Code/syntax.y" /* yacc.c:1646  */
+#line 428 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_Variable_Constructor(yylloc, (yyvsp[0].name));
         }
-#line 1932 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1933 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 430 "Code/syntax.y" /* yacc.c:1646  */
+#line 431 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_Literal_int_Constructor(yylloc, (yyvsp[0].int_val));
         }
-#line 1940 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1941 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 433 "Code/syntax.y" /* yacc.c:1646  */
+#line 434 "Code/syntax.y" /* yacc.c:1646  */
     { 
             (yyval.expr) = Expression_Literal_float_Constructor(yylloc, (yyvsp[0].float_val));
         }
-#line 1948 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1949 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 439 "Code/syntax.y" /* yacc.c:1646  */
+#line 440 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.arglist) = (yyvsp[0].arglist);
         }
-#line 1956 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1957 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 442 "Code/syntax.y" /* yacc.c:1646  */
+#line 443 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.arglist) = NULL;
         }
-#line 1964 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1965 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 447 "Code/syntax.y" /* yacc.c:1646  */
+#line 448 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.arglist) = (yyvsp[0].arglist);
             list_prepend(&(yyval.arglist), (yyvsp[-2].expr));
         }
-#line 1973 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1974 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 451 "Code/syntax.y" /* yacc.c:1646  */
+#line 452 "Code/syntax.y" /* yacc.c:1646  */
     {
             (yyval.arglist) = NULL;
             list_prepend(&(yyval.arglist), (yyvsp[0].expr));
         }
-#line 1982 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1983 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1986 "Code/syntax.tab.c" /* yacc.c:1646  */
+#line 1987 "Code/syntax.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2210,7 +2211,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 458 "Code/syntax.y" /* yacc.c:1906  */
+#line 459 "Code/syntax.y" /* yacc.c:1906  */
 
 
 void yyerror(char const *msg) {

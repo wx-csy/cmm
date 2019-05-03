@@ -3,6 +3,7 @@
 #include "ast/statement.h"
 #include "ast/variable.h"
 #include "ast/type.h"
+#include "ir.h"
 
 Variable Variable_Invalid = {
     .name = "(invalid)",
@@ -21,5 +22,16 @@ void Variable_Add_Initializer(Variable *var, Expression *init) {
         cmm_error(CMM_ERROR_INIT_TYPE_MISMATCH, init->location);
     } else {
         var->initializer = init;
+    }
+}
+
+void Variable_IR_Generate_Declaration(Variable *var, bool is_param) {
+    var->ir_id = ir_newval();
+    if (is_param) {
+        // only size=4 parameter supported
+        assert(var->valtype->width == 4);
+        ir_printf("\tPARAM v%zu\n", var->ir_id);
+    } else if (var->valtype->width != 4) {
+        ir_printf("\tDEC v%zu %zu\n", var->ir_id, var->valtype->width);
     }
 }

@@ -1,5 +1,7 @@
 #include "ast/function.h"
+#include "ast/statement.h"
 #include "ast/type.h"
+#include "ir.h"
 
 Function Function_Invalid = {
     .name = "(invalid)",
@@ -31,3 +33,11 @@ bool Function_Declaration_Compatible(Function *func1, Function *func2) {
     if (list1 || list2) return false;
     return true;
 }
+
+void Function_IR_Generate_Declaration(Function *func) {
+    ir_print_function(func->name);
+    for (VarList param = func->paramlist; param; param = param->next)
+        Variable_IR_Generate_Declaration(param->data, true);
+    Statement_IR_Generate_Declaration(func->stmt);
+}
+
