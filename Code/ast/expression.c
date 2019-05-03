@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include "ir.h"
 #include "cmm.h"
 #include "ast/expression.h"
 #include "ast/function.h"
@@ -197,4 +199,55 @@ Expression_Literal_float_Constructor(cmm_loc_t location, float value) {
     ret->lvalue = false;
     ret->lit_float = value;
     return ret;
+}
+
+static const char *_binary_expr_ir_gen(Expression *expr) {
+
+}
+
+static const char *_unary_expr_ir_gen(Expression *expr) {
+
+}
+
+static const char *_assign_expr_ir_gen(Expression *expr) {
+
+}
+
+static void _arglist_ir_push(ArgList arglist) {
+    for (ArgList arg = arglist; arg; arg = arg->next)
+        ir_emit_arg(Expression_IR_Generate_Code(arg->data), NULL);
+}
+
+static const char *_funccall_ir_gen(Expression *expr) {
+
+}
+
+static const char *_member_access_ir_gen(Expression *expr) {
+
+}
+
+static const char *_variable_ir_gen(Expression *expr) {
+    return ir_make_var(expr->var->ir_id);
+}
+
+static const char *_literal_ir_gen(Expression *expr) {
+    assert(Type_Is_Int(expr->valtype));
+    return ir_make_immd(expr->lit_int);
+}
+
+void Expression_TailCall_IR_Generate_Code(Expression *expr) {
+    _arglist_ir_push(expr->arglist);
+    ir_emit_goto(expr->func->ir_start_label, "tail call for '%s'", expr->func->name);
+}
+
+const char *Expression_IR_Generate_Code(Expression *expr) {
+    switch (expr->type) {
+    case EXPR_BINARY_EXPR: return _binary_expr_ir_gen(expr);
+    case EXPR_UNARY_EXPR: return _unary_expr_ir_gen(expr);
+    case EXPR_ASSIGN: return _assign_expr_ir_gen(expr);
+    case EXPR_FUNCCALL: return _funccall_ir_gen(expr);
+    case EXPR_MEMBERACCESS: return _member_access_ir_gen(expr);
+    case EXPR_VARIABLE: return _variable_ir_gen(expr);
+    case EXPR_LITERAL: return _literal_ir_gen(expr);
+    }
 }

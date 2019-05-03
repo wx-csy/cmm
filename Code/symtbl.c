@@ -50,7 +50,7 @@ symtbl symtbl_functions;
 void symtbl_push_scope(bool is_struct_scope) {
     struct symscope *newscope = pzalloc(sizeof(struct symscope));
     newscope->is_struct_scope = is_struct_scope;
-    newscope->prev = symtbl_scope;
+    newscope->prev  = symtbl_scope;
     symtbl_scope = newscope;
 }
 

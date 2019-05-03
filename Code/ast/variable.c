@@ -30,8 +30,8 @@ void Variable_IR_Generate_Declaration(Variable *var, bool is_param) {
     if (is_param) {
         // only size=4 parameter supported
         assert(var->valtype->width == 4);
-        ir_printf("\tPARAM v%zu\n", var->ir_id);
-    } else if (var->valtype->width != 4) {
-        ir_printf("\tDEC v%zu %zu\n", var->ir_id, var->valtype->width);
+        ir_emit_param(var->ir_id, "param '%s'", var->name);
+    } else {
+        ir_emit_dec(var->ir_id, var->valtype->width, "var '%s'", var->name);
     }
 }

@@ -2,6 +2,7 @@
 #include "ast/statement.h"
 #include "ast/expression.h"
 #include "ast/function.h"
+#include "ir.h"
 
 Statement Statement_Invalid = { .type = STMT_INVALID };
 
@@ -80,4 +81,47 @@ void Statement_IR_Generate_Declaration(Statement *stmt) {
         Variable_IR_Generate_Declaration(var->data, false);
     for (StmtList subst = stmt->stmtlist; subst; subst = subst->next)
         Statement_IR_Generate_Declaration(subst->data);
+}
+
+static void _return_ir_gen(Statement *stmt) {
+    if (stmt->expr->type == EXPR_FUNCCALL) {
+        /* tail call optimization */
+        Expression_TailCall_IR_Generate_Code(stmt->expr);
+    } else {
+        ir_emit_return(Expression_IR_Generate_Code(stmt->expr), NULL);
+    }
+}
+
+static void _ifthen_ir_gen(Statement *stmt) {
+
+}
+
+static void _ifthenelse_ir_gen(Statement *stmt) {
+
+}
+
+static void _while_ir_gen(Statement *stmt) {
+
+}
+
+void Statement_IR_Generate_Code(Statement *stmt) {
+    switch (stmt->type) {
+    case STMT_INVALID:
+        assert(0);
+    case STMT_COMPOUND:
+        for (StmtList subst = stmt->stmtlist; subst; subst = subst->next)
+            Statement_IR_Generate_Code(subst->data);
+        break;
+    case STMT_EXPRESSION:
+        Expression_IR_Generate_Code(stmt->expr);
+        break;
+    case STMT_RETURN:
+        return _return_ir_gen(stmt);
+    case STMT_IFTHEN:
+        return _ifthen_ir_gen(stmt);
+    case STMT_IFTHENELSE:
+        return _ifthenelse_ir_gen(stmt);
+    case STMT_WHILE:
+        return _while_ir_gen(stmt);
+    }
 }

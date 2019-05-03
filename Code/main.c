@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     /* lexical, syntax or semantics error */
     if (cmm_nr_error != 0) return EXIT_FAILURE;
     for (FuncList func = program.funclist; func; func = func->next)
-        Function_IR_Generate_Declaration(func->data);
+        Function_IR_Generate_Code(func->data);
     return 0;
 }
 

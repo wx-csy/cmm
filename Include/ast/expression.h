@@ -98,4 +98,7 @@ Expression_Literal_int_Constructor(cmm_loc_t location, int value);
 
 Expression *
 Expression_Literal_float_Constructor(cmm_loc_t location, float value);
+
+void Expression_TailCall_IR_Generate_Code(Expression *expr);
+const char *Expression_IR_Generate_Code(Expression *expr);
 #endif

@@ -67,5 +67,6 @@ Statement *
 Statement_While_Constructor(cmm_loc_t location, Expression *while_cond, Statement *while_body);
 
 void Statement_IR_Generate_Declaration(Statement *stmt);
+void Statement_IR_Generate_Code(Statement *stmt);
 
 #endif

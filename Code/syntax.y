@@ -156,6 +156,7 @@ ExtDef :
             memset(&$$, 0, sizeof($$));
             symtbl_define_function($FunDec);
             list_prepend(&$$.funclist, $FunDec);
+            printf("function: %s\n", $FunDec->name);
         }
     | FunDec ';'                        {
             // function declaration
