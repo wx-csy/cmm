@@ -246,6 +246,26 @@ static const char *_binary_relop_ir_gen(Expression *expr) {
     return dest;
 }
 
+static const char *_binary_logic_and_gen(Expression *expr) {
+    size_t tmpvar = ir_newvar(), tmplabel = ir_newlabel();
+    const char* dest = ir_make_var(tmpvar);
+    ir_emit_assign(dest, Expression_IR_Generate_Code(expr->lhs), NULL);
+    ir_emit_if("=", dest, "#0", tmplabel, NULL);
+    ir_emit_assign(dest, Expression_IR_Generate_Code(expr->rhs), NULL);
+    ir_emit_label(tmplabel, NULL);
+    return dest;
+}
+
+static const char *_binary_logic_or_gen(Expression *expr) {
+    size_t tmpvar = ir_newvar(), tmplabel = ir_newlabel();
+    const char* dest = ir_make_var(tmpvar);
+    ir_emit_assign(dest, Expression_IR_Generate_Code(expr->lhs), NULL);
+    ir_emit_if("=", dest, "#1", tmplabel, NULL);
+    ir_emit_assign(dest, Expression_IR_Generate_Code(expr->rhs), NULL);
+    ir_emit_label(tmplabel, NULL);
+    return dest;
+}
+
 static const char *_binary_expr_ir_gen(Expression *expr) {
     switch (expr->bop_type) {
     case BOP_ADD:
@@ -260,9 +280,13 @@ static const char *_binary_expr_ir_gen(Expression *expr) {
     case BOP_EQU:
     case BOP_NEQ:
         return _binary_relop_ir_gen(expr);
-    case BOP_AND:break;
-    case BOP_OR:break;
-    case BOP_ARRAY_ACCESS:break;
+    case BOP_AND:
+        return _binary_logic_and_gen(expr);
+    case BOP_OR:
+        return _binary_logic_or_gen(expr);
+    case BOP_ARRAY_ACCESS:
+        assert(!"unimplemented");
+        break;
     }
 }
 
@@ -291,7 +315,7 @@ static const char *_unary_expr_ir_gen(Expression *expr) {
 }
 
 static const char *_assign_expr_ir_gen(Expression *expr) {
-
+    assert(!"unimplemented");
 }
 
 static void _arglist_ir_push(ArgList arglist) {
@@ -308,7 +332,7 @@ static const char *_funccall_ir_gen(Expression *expr) {
 }
 
 static const char *_member_access_ir_gen(Expression *expr) {
-
+    assert(!"unimplemented");
 }
 
 static const char *_variable_ir_gen(Expression *expr) {
