@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "ir.h"
 #include "cmm.h"
 #include "ast/expression.h"
@@ -344,11 +345,19 @@ static void _arglist_ir_push(ArgList arglist) {
         ir_emit_arg(Expression_IR_Generate_Code(arg->data), NULL);
 }
 
+
 static const char *_funccall_ir_gen(Expression *expr) {
-    _arglist_ir_push(expr->arglist);
     size_t tempvar = ir_newvar();
     const char *dest = ir_make_var(tempvar);
-    ir_emit_call(dest, expr->func->name, "call '%s'", expr->func->name);
+    if (strcmp(expr->func->name, "read") == 0) {
+        ir_emit_read(dest, NULL);
+    } else if (strcmp(expr->func->name, "write") == 0) {
+        ir_emit_write(Expression_IR_Generate_Code(expr->arglist->data), NULL);
+        ir_emit_assign(dest, "#0", NULL);
+    } else {
+        _arglist_ir_push(expr->arglist);
+        ir_emit_call(dest, expr->func->name, "call '%s'", expr->func->name);
+    }
     return dest;
 }
 
@@ -371,6 +380,7 @@ static const char *_read_ir_gen(Expression *expr) {
     ir_emit_read(dest, NULL);
     return dest;
 }
+
 
 static const char *_write_ir_gen(Expression *expr) {
     ir_emit_write(Expression_IR_Generate_Code(expr->rhs), NULL);
