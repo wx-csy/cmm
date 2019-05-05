@@ -27,6 +27,5 @@ void ir_emit_call(const char *dest, const char *funcname, const char *fmt, ...);
 void ir_emit_arg(const char *arg, const char *fmt, ...);
 void ir_emit_read(const char *dest, const char *fmt, ...);
 void ir_emit_write(const char *src, const char *fmt, ...);
-void ir_finalize(void);
 
 #endif

@@ -1,5 +1,6 @@
 #include "ir.h"
 #include "symtbl.h"
+#include "option.h"
 #include "ast/function.h"
 #include <stdio.h>
 #include <stdarg.h>
@@ -20,15 +21,15 @@ size_t ir_newvar() {
     _ir_print_comment(fmt, ap);                             \
     va_end(ap);
 
-#define SHOW_COMMENT 1
+
 
 static void _ir_print_comment(const char *fmt, va_list arglist) {
-#if (defined SHOW_COMMENT) && SHOW_COMMENT
-    if (fmt) {
-        printf("\t; ");
-        vprintf(fmt, arglist);
+    if (opt_show_comment) {
+        if (fmt) {
+            printf("\t; ");
+            vprintf(fmt, arglist);
+        }
     }
-#endif
     printf("\n");
 }
 
@@ -59,7 +60,7 @@ const char *ir_make_deref(size_t varid) {
 void ir_emit_function(const char *funcname, const char *fmt, ...) {
     printf("\n");
     /* function name must be mangled */
-    printf("FUNCTION _%s : ", funcname);
+    printf("FUNCTION %s : ", funcname);
     _IR_COMMENT
 }
 
@@ -74,7 +75,7 @@ void ir_emit_param(size_t varid, const char *fmt, ...) {
 }
 
 void ir_emit_label(size_t labelid, const char *fmt, ...) {
-    printf("LABEL l%zu : ", labelid);
+    printf("LABEL _L%zu : ", labelid);
     _IR_COMMENT
 }
 
@@ -104,12 +105,12 @@ void ir_emit_assign_address(const char *dest, const char *src, const char *fmt, 
 }
 
 void ir_emit_goto(size_t labelid, const char *fmt, ...) {
-    printf("    GOTO l%zu ", labelid);
+    printf("    GOTO _L%zu ", labelid);
     _IR_COMMENT
 }
 
 void ir_emit_if(const char *relop, const char *src1, const char *src2, size_t labelid, const char *fmt, ...) {
-    printf("    IF %s %s %s GOTO l%zu ", src1, relop, src2, labelid);
+    printf("    IF %s %s %s GOTO _L%zu ", src1, relop, src2, labelid);
     _IR_COMMENT
 }
 
@@ -119,7 +120,7 @@ void ir_emit_return(const char *src, const char *fmt, ...) {
 }
 
 void ir_emit_call(const char *dest, const char *funcname, const char *fmt, ...) {
-    printf("    %s := CALL _%s ", dest, funcname);
+    printf("    %s := CALL %s ", dest, funcname);
     _IR_COMMENT
 }
 
@@ -136,10 +137,4 @@ void ir_emit_read(const char * dest, const char *fmt, ...) {
 void ir_emit_write(const char *src, const char *fmt, ...) {
     printf("    WRITE %s ", src);
     _IR_COMMENT
-}
-
-void ir_finalize() {
-    Function *funcmain = symtbl_function_find("main", CMM_LOC_INITIALIZER);
-    puts("\nFUNCTION main :");
-    ir_emit_goto(funcmain->ir_start_label, NULL);
 }

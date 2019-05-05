@@ -33,5 +33,8 @@ void Variable_IR_Generate_Declaration(Variable *var, bool is_param) {
         ir_emit_param(var->ir_id, "param '%s'", var->name);
     } else {
         ir_emit_dec(var->ir_id, var->valtype->width, "var '%s'", var->name);
+        if (var->initializer)
+            ir_emit_assign(ir_make_var(var->ir_id),
+                Expression_IR_Generate_Code(var->initializer), NULL);
     }
 }

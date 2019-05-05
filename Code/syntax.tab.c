@@ -1928,7 +1928,7 @@ yyreduce:
   case 63:
 #line 429 "Code/syntax.y" /* yacc.c:1646  */
     { 
-            (yyval.expr) = Expression_Variable_Constructor(yylloc, (yyvsp[0].name));
+            (yyval.expr) = Expression_Variable_Constructor(yylloc, symtbl_variable_find((yyvsp[0].name), yylloc));
         }
 #line 1934 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;

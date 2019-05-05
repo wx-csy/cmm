@@ -6,7 +6,6 @@
 #include "cmm.h"
 #include "symtbl.h"
 
-
 // zero initialization is enough
 void symtbl_init(symtbl *table) {
     memset(table, 0, sizeof(*table));

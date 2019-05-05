@@ -1,6 +1,0 @@
-FUNCTION main :
-LABEL l1 :
-LABEL l2 :
-LABEL l3 :
-LABEL l4 :
-    RETURN #0

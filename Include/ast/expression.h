@@ -33,7 +33,9 @@ typedef enum ExprType {
     EXPR_FUNCCALL,
     EXPR_MEMBERACCESS,
     EXPR_VARIABLE,
-    EXPR_LITERAL
+    EXPR_LITERAL,
+    EXPR_READ,
+    EXPR_WRITE,
 } ExprType;
 
 typedef struct Expression {
@@ -91,13 +93,19 @@ Expression *
 Expression_MemberAccess_Constructor(cmm_loc_t location, Expression *expr, const char *memname);
 
 Expression *
-Expression_Variable_Constructor(cmm_loc_t location, const char *varname);
+Expression_Variable_Constructor(cmm_loc_t location, Variable *var);
 
 Expression *
 Expression_Literal_int_Constructor(cmm_loc_t location, int value);
 
 Expression *
 Expression_Literal_float_Constructor(cmm_loc_t location, float value);
+
+Expression *
+Expression_Read_Constructor(cmm_loc_t location);
+
+Expression *
+Expression_Write_Constructor(cmm_loc_t location, Expression* src);
 
 void Expression_TailCall_IR_Generate_Code(Expression *expr);
 const char *Expression_IR_Generate_Code(Expression *expr);

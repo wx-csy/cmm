@@ -427,7 +427,7 @@ Exp :
             $$ = Expression_MemberAccess_Constructor(yylloc, $1, $ID);
         }
     | ID                                { 
-            $$ = Expression_Variable_Constructor(yylloc, $ID);
+            $$ = Expression_Variable_Constructor(yylloc, symtbl_variable_find($ID, yylloc));
         }
     | INT                               { 
             $$ = Expression_Literal_int_Constructor(yylloc, $INT);

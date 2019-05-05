@@ -95,7 +95,7 @@ static void _return_ir_gen(Statement *stmt) {
 static void _ifthen_ir_gen(Statement *stmt) {
     const char *cond_str = Expression_IR_Generate_Code(stmt->if_cond);
     size_t if_false_label = ir_newlabel();
-    ir_emit_if("!=", cond_str, "#0", if_false_label, NULL);
+    ir_emit_if("==", cond_str, "#0", if_false_label, NULL);
     Statement_IR_Generate_Code(stmt->stat_if_true);
     ir_emit_label(if_false_label, NULL);
 }
@@ -103,7 +103,7 @@ static void _ifthen_ir_gen(Statement *stmt) {
 static void _ifthenelse_ir_gen(Statement *stmt) {
     const char *cond_str = Expression_IR_Generate_Code(stmt->if_cond);
     size_t if_false_label = ir_newlabel(), if_end_label = ir_newlabel();
-    ir_emit_if("!=", cond_str, "#0", if_false_label, NULL);
+    ir_emit_if("==", cond_str, "#0", if_false_label, NULL);
     Statement_IR_Generate_Code(stmt->stat_if_true);
     ir_emit_goto(if_end_label, NULL);
     ir_emit_label(if_false_label, NULL);
