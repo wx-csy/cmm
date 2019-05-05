@@ -120,6 +120,7 @@ Expression *
 Expression_FuncCall_Constructor(cmm_loc_t location, const char *funcname, ArgList args) {
     Expression *ret = palloc(sizeof(Expression));
     Function *func = symtbl_function_find(funcname, location);
+
     ret->type = EXPR_FUNCCALL;
     ret->location = location;
     ret->valtype = func->rettype;

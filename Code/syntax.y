@@ -133,9 +133,9 @@ Program :
 
 ExtDefList : 
       ExtDef ExtDefList[old]            {
-            $$ = $old;
-            list_join(&$$.funclist, $ExtDef.funclist);
-            list_join(&$$.varlist, $ExtDef.varlist);
+            $$ = $ExtDef;
+            list_join(&$$.funclist, $old.funclist);
+            list_join(&$$.varlist, $old.varlist);
         }
     | %empty                            {
             memset(&$$, 0, sizeof($$));

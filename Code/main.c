@@ -3,6 +3,7 @@
 #include "cmm.h"
 #include "ast/ast.h"
 #include "ast/function.h"
+#include "ir.h"
 
 Program program;
 
@@ -18,6 +19,7 @@ int main(int argc, char *argv[]) {
     if (cmm_nr_error != 0) return EXIT_FAILURE;
     for (FuncList func = program.funclist; func; func = func->next)
         Function_IR_Generate_Code(func->data);
+    ir_finalize();
     return 0;
 }
 

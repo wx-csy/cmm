@@ -1406,9 +1406,9 @@ yyreduce:
   case 4:
 #line 135 "Code/syntax.y" /* yacc.c:1646  */
     {
-            (yyval.extdef) = (yyvsp[0].extdef);
-            list_join(&(yyval.extdef).funclist, (yyvsp[-1].extdef).funclist);
-            list_join(&(yyval.extdef).varlist, (yyvsp[-1].extdef).varlist);
+            (yyval.extdef) = (yyvsp[-1].extdef);
+            list_join(&(yyval.extdef).funclist, (yyvsp[0].extdef).funclist);
+            list_join(&(yyval.extdef).varlist, (yyvsp[0].extdef).varlist);
         }
 #line 1414 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;

@@ -1,4 +1,6 @@
 #include "ir.h"
+#include "symtbl.h"
+#include "ast/function.h"
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -134,4 +136,10 @@ void ir_emit_read(const char * dest, const char *fmt, ...) {
 void ir_emit_write(const char *src, const char *fmt, ...) {
     printf("    WRITE %s ", src);
     _IR_COMMENT
+}
+
+void ir_finalize() {
+    Function *funcmain = symtbl_function_find("main", CMM_LOC_INITIALIZER);
+    puts("\nFUNCTION main :");
+    ir_emit_goto(funcmain->ir_start_label, NULL);
 }

@@ -51,6 +51,7 @@ static const char *errfmt[16] = {
     [1]                     = "error type A at Line %d, Col %d: ",
     [2]                     = "error type B at Line %d, Col %d: ",
     [3]                     = "error type %d at Line %d, Col %d: ",
+    [4]                     = "translation error: "
 };
 
 void cmm_error(int cmm_errno, cmm_loc_t loc, ...) {
@@ -69,6 +70,8 @@ void cmm_error(int cmm_errno, cmm_loc_t loc, ...) {
     case 3: /* semantic error */
         fprintf(stderr, errfmt[3], cmm_errno % 1000 / 10, loc.line, loc.col);
         break;
+    case 4: /* translation error */
+        fputs(errfmt[4], stderr);
     default:
         assert(0);
     }
