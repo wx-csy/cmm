@@ -1445,8 +1445,8 @@ yyreduce:
             symtbl_pop_scope();
             memset(&(yyval.extdef), 0, sizeof((yyval.extdef)));
             symtbl_define_function((yyvsp[-1].func));
+            (yyvsp[-1].func) = symtbl_function_find((yyvsp[-1].func)->name, yylloc);
             list_prepend(&(yyval.extdef).funclist, (yyvsp[-1].func));
-            printf("function: %s\n", (yyvsp[-1].func)->name);
         }
 #line 1452 "Code/syntax.tab.c" /* yacc.c:1646  */
     break;

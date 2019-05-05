@@ -1,17 +1,6 @@
-
-FUNCTION fact :
-LABEL fbeg :
-    PARAM x
-    IF x == #0 GOTO fin
-    x := x - #1
-    ARG x
-    GOTO fbeg
-LABEL fin :
-    RETURN #3
-
-
 FUNCTION main :
-    ARG #10
-    x := CALL fact
-    WRITE x
+LABEL l1 :
+LABEL l2 :
+LABEL l3 :
+LABEL l4 :
     RETURN #0

@@ -9,7 +9,7 @@ size_t ir_newlabel() {
     return nextlabel++;
 }
 
-size_t ir_newval() {
+size_t ir_newvar() {
     static size_t nextval = 1;
     return nextval++;
 }
@@ -109,7 +109,7 @@ void ir_emit_goto(size_t labelid, const char *fmt, ...) {
 }
 
 void ir_emit_if(const char *relop, const char *src1, const char *src2, size_t labelid, const char *fmt, ...) {
-    printf("    IF %s %s %s GOTO %zu ", src1, relop, src2, labelid);
+    printf("    IF %s %s %s GOTO l%zu ", src1, relop, src2, labelid);
     _IR_COMMENT
 }
 
@@ -119,7 +119,7 @@ void ir_emit_return(const char *src, const char *fmt, ...) {
 }
 
 void ir_emit_call(const char *dest, const char *funcname, const char *fmt, ...) {
-    printf("    %s = CALL %s ", dest, funcname);
+    printf("    %s := CALL _%s ", dest, funcname);
     _IR_COMMENT
 }
 

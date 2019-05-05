@@ -4,7 +4,7 @@
 #include "common.h"
 
 size_t ir_newlabel();
-size_t ir_newval();
+size_t ir_newvar();
 
 const char *ir_make_immd(int value);
 const char *ir_make_var(size_t varid);

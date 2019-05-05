@@ -26,7 +26,7 @@ void Variable_Add_Initializer(Variable *var, Expression *init) {
 }
 
 void Variable_IR_Generate_Declaration(Variable *var, bool is_param) {
-    var->ir_id = ir_newval();
+    var->ir_id = ir_newvar();
     if (is_param) {
         // only size=4 parameter supported
         assert(var->valtype->width == 4);

@@ -43,4 +43,5 @@ void Function_IR_Generate_Code(Function *func) {
         Variable_IR_Generate_Declaration(param->data, true);
     Statement_IR_Generate_Declaration(func->stmt);
     Statement_IR_Generate_Code(func->stmt);
+    ir_emit_return("#0", "end function '%s'", func->name);
 }

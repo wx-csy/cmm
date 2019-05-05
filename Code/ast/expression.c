@@ -202,12 +202,92 @@ Expression_Literal_float_Constructor(cmm_loc_t location, float value) {
     return ret;
 }
 
-static const char *_binary_expr_ir_gen(Expression *expr) {
+static const char *_binary_arith_ir_gen(Expression *expr) {
+    const char *arith_op;
+    switch (expr->bop_type) {
+    case BOP_ADD: arith_op = "+"; break;
+    case BOP_MINUS: arith_op = "-"; break;
+    case BOP_STAR: arith_op = "*"; break;
+    case BOP_DIV: arith_op = "/"; break;
+    default: assert(0);
+    }
+    size_t tmpvar = ir_newvar();
+    const char* dest = ir_make_var(tmpvar);
+    ir_emit_binaryop(dest, arith_op,
+        Expression_IR_Generate_Code(expr->lhs),
+        Expression_IR_Generate_Code(expr->rhs),
+        NULL
+        );
+    return dest;
+}
 
+static const char *_binary_relop_ir_gen(Expression *expr) {
+    const char *rel_op;
+    switch (expr->bop_type) {
+    case BOP_GT: rel_op = ">"; break;
+    case BOP_LT: rel_op = "<"; break;
+    case BOP_GE: rel_op = ">="; break;
+    case BOP_LE: rel_op = "<="; break;
+    case BOP_EQU: rel_op = "=="; break;
+    case BOP_NEQ: rel_op = "!="; break;
+    default: assert(0);
+    }
+    size_t tmpvar = ir_newvar(), tmplabel = ir_newlabel();
+    const char* dest = ir_make_var(tmpvar);
+    ir_emit_assign(dest, "#1", NULL);
+    ir_emit_if(rel_op,
+        Expression_IR_Generate_Code(expr->lhs),
+        Expression_IR_Generate_Code(expr->rhs),
+        tmplabel,
+        NULL
+    );
+    ir_emit_assign(dest, "#0", NULL);
+    ir_emit_label(tmplabel, NULL);
+    return dest;
+}
+
+static const char *_binary_expr_ir_gen(Expression *expr) {
+    switch (expr->bop_type) {
+    case BOP_ADD:
+    case BOP_MINUS:
+    case BOP_STAR:
+    case BOP_DIV:
+        return _binary_arith_ir_gen(expr);
+    case BOP_GT:
+    case BOP_LT:
+    case BOP_GE:
+    case BOP_LE:
+    case BOP_EQU:
+    case BOP_NEQ:
+        return _binary_relop_ir_gen(expr);
+    case BOP_AND:break;
+    case BOP_OR:break;
+    case BOP_ARRAY_ACCESS:break;
+    }
+}
+
+static const char *_unary_negate_ir_gen(Expression *expr) {
+    size_t tmpvar = ir_newvar();
+    const char* dest = ir_make_var(tmpvar);
+    ir_emit_binaryop(dest, "-", "#0", Expression_IR_Generate_Code(expr->rhs), NULL);
+    return dest;
+}
+
+static const char *_unary_not_ir_gen(Expression *expr) {
+    size_t tmpvar = ir_newvar(), tmplabel = ir_newlabel();
+    const char* dest = ir_make_var(tmpvar);
+    ir_emit_assign(dest, "#0", NULL);
+    ir_emit_if("=", Expression_IR_Generate_Code(expr->rhs), "#0", tmplabel, NULL);
+    ir_emit_assign(dest, "#1", NULL);
+    ir_emit_label(tmplabel, NULL);
+    return dest;
 }
 
 static const char *_unary_expr_ir_gen(Expression *expr) {
-
+    switch (expr->uop_type) {
+    case UOP_NEGATE: return _unary_negate_ir_gen(expr);
+    case UOP_NOT: return _unary_not_ir_gen(expr);
+    }
 }
 
 static const char *_assign_expr_ir_gen(Expression *expr) {
@@ -220,7 +300,11 @@ static void _arglist_ir_push(ArgList arglist) {
 }
 
 static const char *_funccall_ir_gen(Expression *expr) {
-
+    _arglist_ir_push(expr->arglist);
+    size_t tempvar = ir_newvar();
+    const char *dest = ir_make_var(tempvar);
+    ir_emit_call(dest, expr->func->name, "call '%s'", expr->func->name);
+    return dest;
 }
 
 static const char *_member_access_ir_gen(Expression *expr) {

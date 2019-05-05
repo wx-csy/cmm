@@ -93,15 +93,32 @@ static void _return_ir_gen(Statement *stmt) {
 }
 
 static void _ifthen_ir_gen(Statement *stmt) {
-
+    const char *cond_str = Expression_IR_Generate_Code(stmt->if_cond);
+    size_t if_false_label = ir_newlabel();
+    ir_emit_if("!=", cond_str, "#0", if_false_label, NULL);
+    Statement_IR_Generate_Code(stmt->stat_if_true);
+    ir_emit_label(if_false_label, NULL);
 }
 
 static void _ifthenelse_ir_gen(Statement *stmt) {
-
+    const char *cond_str = Expression_IR_Generate_Code(stmt->if_cond);
+    size_t if_false_label = ir_newlabel(), if_end_label = ir_newlabel();
+    ir_emit_if("!=", cond_str, "#0", if_false_label, NULL);
+    Statement_IR_Generate_Code(stmt->stat_if_true);
+    ir_emit_goto(if_end_label, NULL);
+    ir_emit_label(if_false_label, NULL);
+    Statement_IR_Generate_Code(stmt->stat_if_false);
+    ir_emit_label(if_end_label, NULL);
 }
 
 static void _while_ir_gen(Statement *stmt) {
-
+    size_t while_begin = ir_newlabel(), while_end = ir_newlabel();
+    ir_emit_label(while_begin, NULL);
+    const char *cond_str = Expression_IR_Generate_Code(stmt->while_cond);
+    ir_emit_if("!=", cond_str, "#0", while_end, NULL);
+    Statement_IR_Generate_Code(stmt->while_body);
+    ir_emit_goto(while_begin, NULL);
+    ir_emit_label(while_end, NULL);
 }
 
 void Statement_IR_Generate_Code(Statement *stmt) {
