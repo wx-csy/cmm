@@ -1,14 +1,11 @@
 #include <stdarg.h>
+#include <string.h>
 #include "ir.h"
 #include "memory.h"
 #include "stdio.h"
 #include "option.h"
 
-IRList ir_list;
-
-void ir_gen_init() {
-    dlist_init(&ir_list);
-}
+IRList define_dlist(ir_list);
 
 void ir_gen_add(ir_instr instr) {
     dlist_insert(&ir_list, instr);
@@ -20,13 +17,13 @@ void ir_gen_add_with_comment(ir_instr instr, const char *fmt, ...) {
     va_list ap;
 
     va_start(ap, fmt);
-    size = vsnprintf(NULL, 0, fmt, ap) + 1;
+    size = vsnprintf(NULL, 0, fmt, ap) + 4;
     va_end(ap);
     if (size > 0) {
         comment = palloc((size_t)size);
-
+        strcpy(comment, "\t; ");
         va_start(ap, fmt);
-        vsnprintf(comment, (size_t)size, fmt, ap);
+        vsnprintf(comment + strlen(comment), (size_t)size, fmt, ap);
     }
     instr.comment = comment;
     dlist_insert(&ir_list, instr);
@@ -36,10 +33,10 @@ static const char *_ir_valstr(ir_val val) {
     char *buf = palloc(32);
     switch (val.type) {
     case IRVAL_NULL: assert(!"unexpected ir_val type (IRVAL_NULL)");
-    case IRVAL_IMMD: sprintf(buf, "#%d\n", val.immd); break;
-    case IRVAL_VARIABLE: sprintf(buf, "v%zu\n", val.varid); break;
-    case IRVAL_REF: sprintf(buf, "&v%zu\n", val.varid); break;
-    case IRVAL_DEREF: sprintf(buf, "*v%zu\n", val.varid); break;
+    case IRVAL_IMMD: sprintf(buf, "#%d", val.immd); break;
+    case IRVAL_VARIABLE: sprintf(buf, "v%zu", val.varid); break;
+    case IRVAL_REF: sprintf(buf, "&v%zu", val.varid); break;
+    case IRVAL_DEREF: sprintf(buf, "*v%zu", val.varid); break;
     }
     return buf;
 }
@@ -57,7 +54,7 @@ static void _ir_write_param(FILE *stream, ir_instr instr) {
 }
 
 static void _ir_write_label(FILE *stream, ir_instr instr) {
-    fprintf(stream, "LABEL _L%zu", instr.label);
+    fprintf(stream, "LABEL _L%zu :", instr.label);
 }
 
 static void _ir_write_assign(FILE *stream, ir_instr instr) {
@@ -97,7 +94,7 @@ static void _ir_write_return(FILE *stream, ir_instr instr) {
 }
 
 static void _ir_write_call(FILE *stream, ir_instr instr) {
-    fprintf(stream, "\tCALL %s", instr.func);
+    fprintf(stream, "\t%s := CALL %s", _ir_valstr(instr.dest), instr.func);
 }
 
 static void _ir_write_arg(FILE *stream, ir_instr instr) {
@@ -128,7 +125,8 @@ static void (*ir_write_func[256])(FILE *, ir_instr) = {
     [IRINSTR_WRITE]     = _ir_write_write,
 };
 
-void ir_gen_output(FILE *stream) {
+void ir_gen_output() {
+    FILE *stream = opt_output_stream;
     dlist_foreach(&ir_list, iter) {
         ir_write_func[iter->data.type](stream, iter->data);
         if (opt_show_comment && iter->data.comment)

@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "ast/type.h"
 #include "location.h"
+#include "ir.h"
 
 typedef enum UnaryOperator {
     UOP_NEGATE,
@@ -108,5 +109,5 @@ Expression *
 Expression_Write_Constructor(cmm_loc_t location, Expression* src);
 
 void Expression_TailCall_IR_Generate_Code(Expression *expr);
-const char *Expression_IR_Generate_Code(Expression *expr);
+ir_val Expression_IR_Generate_Code(Expression *expr);
 #endif

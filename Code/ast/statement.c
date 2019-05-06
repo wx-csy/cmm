@@ -88,37 +88,37 @@ static void _return_ir_gen(Statement *stmt) {
         /* tail call optimization */
         Expression_TailCall_IR_Generate_Code(stmt->expr);
     } else {
-        ir_emit_return(Expression_IR_Generate_Code(stmt->expr), NULL);
+        ir_gen_add(ir_make_return(Expression_IR_Generate_Code(stmt->expr)));
     }
 }
 
 static void _ifthen_ir_gen(Statement *stmt) {
-    const char *cond_str = Expression_IR_Generate_Code(stmt->if_cond);
+    ir_val cond = Expression_IR_Generate_Code(stmt->if_cond);
     size_t if_false_label = ir_newlabel();
-    ir_emit_if("==", cond_str, "#0", if_false_label, NULL);
+    ir_gen_add(ir_make_if(IRREL_EQU, cond, ir_make_immd(0), if_false_label));
     Statement_IR_Generate_Code(stmt->stat_if_true);
-    ir_emit_label(if_false_label, NULL);
+    ir_gen_add(ir_make_label(if_false_label));
 }
 
 static void _ifthenelse_ir_gen(Statement *stmt) {
-    const char *cond_str = Expression_IR_Generate_Code(stmt->if_cond);
+    ir_val cond = Expression_IR_Generate_Code(stmt->if_cond);
     size_t if_false_label = ir_newlabel(), if_end_label = ir_newlabel();
-    ir_emit_if("==", cond_str, "#0", if_false_label, NULL);
+    ir_gen_add(ir_make_if(IRREL_EQU, cond, ir_make_immd(0), if_false_label));
     Statement_IR_Generate_Code(stmt->stat_if_true);
-    ir_emit_goto(if_end_label, NULL);
-    ir_emit_label(if_false_label, NULL);
+    ir_gen_add(ir_make_goto(if_end_label));
+    ir_gen_add(ir_make_label(if_false_label));
     Statement_IR_Generate_Code(stmt->stat_if_false);
-    ir_emit_label(if_end_label, NULL);
+    ir_gen_add(ir_make_label(if_end_label));
 }
 
 static void _while_ir_gen(Statement *stmt) {
     size_t while_begin = ir_newlabel(), while_end = ir_newlabel();
-    ir_emit_label(while_begin, NULL);
-    const char *cond_str = Expression_IR_Generate_Code(stmt->while_cond);
-    ir_emit_if("!=", cond_str, "#0", while_end, NULL);
+    ir_gen_add(ir_make_label(while_begin));
+    ir_val cond = Expression_IR_Generate_Code(stmt->while_cond);
+    ir_gen_add(ir_make_if(IRREL_NEQ, cond, ir_make_immd(0), while_end));
     Statement_IR_Generate_Code(stmt->while_body);
-    ir_emit_goto(while_begin, NULL);
-    ir_emit_label(while_end, NULL);
+    ir_gen_add(ir_make_goto(while_begin));
+    ir_gen_add(ir_make_label(while_end));
 }
 
 void Statement_IR_Generate_Code(Statement *stmt) {

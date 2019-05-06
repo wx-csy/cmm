@@ -10,7 +10,6 @@
 
 Program program;
 
-
 int main(int argc, char *argv[]) {
     opt_parse(argc, argv);
     builtin_declare();
@@ -20,6 +19,8 @@ int main(int argc, char *argv[]) {
     if (cmm_nr_error != 0) return EXIT_FAILURE;
     for (FuncList func = program.funclist; func; func = func->next)
         Function_IR_Generate_Code(func->data);
+    if (opt_optimize) ir_optimize();
+    ir_gen_output();
     return 0;
 }
 

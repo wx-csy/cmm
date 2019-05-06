@@ -30,11 +30,10 @@ void Variable_IR_Generate_Declaration(Variable *var, bool is_param) {
     if (is_param) {
         // only size=4 parameter supported
         assert(var->valtype->width == 4);
-        ir_emit_param(var->ir_id, "param '%s'", var->name);
+        ir_gen_add_with_comment(ir_make_param(ir_make_var(var->ir_id)), "param '%s'", var->name);
     } else {
-        ir_emit_dec(var->ir_id, var->valtype->width, "var '%s'", var->name);
+        ir_gen_add_with_comment(ir_make_dec(ir_make_var(var->ir_id), var->valtype->width), "var '%s'", var->name);
         if (var->initializer)
-            ir_emit_assign(ir_make_var(var->ir_id),
-                Expression_IR_Generate_Code(var->initializer), NULL);
+            ir_gen_add(ir_make_assign(ir_make_var(var->ir_id), Expression_IR_Generate_Code(var->initializer)));
     }
 }

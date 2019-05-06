@@ -25,6 +25,7 @@ typedef struct ir_val {
 } ir_val;
 
 typedef enum IRInstrType {
+    IRINSTR_NULL,
     IRINSTR_FUNCTION,
     IRINSTR_DEC,
     IRINSTR_PARAM,
@@ -71,34 +72,31 @@ typedef struct ir_instr {
     const char *comment;
 } ir_instr;
 
-const char *ir_make_immd(int value);
-const char *ir_make_var(size_t varid);
-const char *ir_make_ref(size_t varid);
-const char *ir_make_deref(size_t varid);
+ir_val ir_make_immd(int value);
+ir_val ir_make_var(size_t varid);
+ir_val ir_make_ref(size_t varid);
+ir_val ir_make_deref(size_t varid);
 
-void ir_emit_function(const char *funcname, const char *fmt, ...);
-void ir_emit_dec(size_t varid, size_t size, const char *fmt, ...);
-void ir_emit_param(size_t varid, const char *fmt, ...);
-void ir_emit_label(size_t labelid, const char *fmt, ...);
-void ir_emit_assign(const char *dest, const char *src, const char *fmt, ...);
-void ir_emit_binaryop(const char *dest, const char *op, const char *src1, const char *src2, const char *fmt, ...);
-void ir_emit_addressof(const char *dest, const char *src, const char *fmt, ...);
-void ir_emit_dereference(const char *dest, const char *src, const char *fmt, ...);
-void ir_emit_assign_address(const char *dest, const char *src, const char *fmt, ...);
-void ir_emit_goto(size_t labelid, const char *fmt, ...);
-void ir_emit_if(const char *relop, const char *src1, const char *src2, size_t labelid, const char *fmt, ...);
-void ir_emit_return(const char *src, const char *fmt, ...);
-void ir_emit_call(const char *dest, const char *funcname, const char *fmt, ...);
-void ir_emit_arg(const char *arg, const char *fmt, ...);
-void ir_emit_read(const char *dest, const char *fmt, ...);
-void ir_emit_write(const char *src, const char *fmt, ...);
+ir_instr ir_make_function(const char *func);
+ir_instr ir_make_dec(ir_val declared, size_t size);
+ir_instr ir_make_param(ir_val declared);
+ir_instr ir_make_label(size_t label);
+ir_instr ir_make_assign(ir_val dest, ir_val src);
+ir_instr ir_make_binary_op(IRBinaryOperator bop, ir_val dest, ir_val src1, ir_val src2);
+ir_instr ir_make_goto(size_t label);
+ir_instr ir_make_if(IRRelationalOperator rop, ir_val src1, ir_val src2, size_t label);
+ir_instr ir_make_return(ir_val src);
+ir_instr ir_make_call(ir_val dest, const char *func);
+ir_instr ir_make_arg(ir_val src);
+ir_instr ir_make_read(ir_val dest);
+ir_instr ir_make_write(ir_val src);
 
 typedef declare_dlist_node(IRList, ir_instr) IRList;
 extern IRList ir_list;
 
-void ir_gen_init();
 void ir_gen_add(ir_instr instr);
 void ir_gen_add_with_comment(ir_instr instr, const char *fmt, ...);
-void ir_gen_output(FILE *stream);
+void ir_gen_output(void);
+void ir_optimize(void);
 
 #endif

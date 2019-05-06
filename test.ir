@@ -1,0 +1,39 @@
+
+FUNCTION read :
+LABEL _L1 :
+	READ v1
+	RETURN v1
+	RETURN #0
+
+FUNCTION write :
+LABEL _L2 :
+	PARAM v2
+	WRITE v2
+	RETURN #0
+
+FUNCTION fact :
+LABEL _L3 :
+	PARAM v3
+	v4 := #1
+	IF v3 == #0 GOTO _L4
+	v4 := #0
+LABEL _L4 :
+	IF v4 == #0 GOTO _L5
+	RETURN #1
+LABEL _L5 :
+	v7 := v3 - #1
+	ARG v7
+	v6 := CALL fact
+	v5 := v6 * v3
+	RETURN v5
+	RETURN #0
+
+FUNCTION main :
+LABEL _L6 :
+	READ v10
+	ARG v10
+	v9 := CALL fact
+	WRITE v9
+	v8 := #0
+	RETURN #0
+	RETURN #0
