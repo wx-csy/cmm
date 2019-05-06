@@ -1,0 +1,74 @@
+
+FUNCTION read :
+LABEL _L1 :
+	READ v1
+	RETURN v1
+	RETURN #0
+
+FUNCTION write :
+LABEL _L2 :
+	PARAM v2
+	WRITE v2
+	RETURN #0
+
+FUNCTION modulo :
+LABEL _L3 :
+	PARAM v3
+	PARAM v4
+	v7 := v3 / v4
+	v6 := v7 * v4
+	v5 := v3 - v6
+	RETURN v5
+	RETURN #0
+
+FUNCTION is_prime :
+LABEL _L4 :
+	PARAM v8
+	DEC v9 4
+	v9 := #2
+LABEL _L5 :
+	v10 := #1
+	v11 := v9 * v9
+	IF v11 <= v8 GOTO _L7
+	v10 := #0
+LABEL _L7 :
+	IF v10 == #0 GOTO _L6
+	v12 := #1
+	ARG v9
+	ARG v8
+	v13 := CALL modulo
+	IF v13 == #0 GOTO _L8
+	v12 := #0
+LABEL _L8 :
+	IF v12 == #0 GOTO _L9
+	RETURN #0
+LABEL _L9 :
+	v14 := v9 + #1
+	v9 := v14
+	GOTO _L5
+LABEL _L6 :
+	RETURN #1
+	RETURN #0
+
+FUNCTION main :
+LABEL _L10 :
+	DEC v15 4
+	v15 := #2
+LABEL _L11 :
+	v16 := #1
+	IF v15 <= #100 GOTO _L13
+	v16 := #0
+LABEL _L13 :
+	IF v16 == #0 GOTO _L12
+	ARG v15
+	v17 := CALL is_prime
+	IF v17 == #0 GOTO _L14
+	WRITE v15
+	v18 := #0
+LABEL _L14 :
+	v19 := v15 + #1
+	v15 := v19
+	GOTO _L11
+LABEL _L12 :
+	RETURN #0
+	RETURN #0

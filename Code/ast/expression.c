@@ -352,8 +352,10 @@ static ir_val _assign_expr_ir_gen(Expression *expr) {
 }
 
 static void _arglist_ir_push(ArgList arglist) {
-    for (ArgList arg = arglist; arg; arg = arg->next)
-        ir_gen_add(ir_make_arg(Expression_IR_Generate_Code(arg->data)));
+    if (!arglist) return;
+    ir_val temp = Expression_IR_Generate_Code(arglist->data);
+    _arglist_ir_push(arglist->next);
+    ir_gen_add(ir_make_arg(temp));
 }
 
 static ir_val _funccall_ir_gen(Expression *expr) {

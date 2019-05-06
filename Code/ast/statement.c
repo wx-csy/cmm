@@ -115,7 +115,7 @@ static void _while_ir_gen(Statement *stmt) {
     size_t while_begin = ir_newlabel(), while_end = ir_newlabel();
     ir_gen_add(ir_make_label(while_begin));
     ir_val cond = Expression_IR_Generate_Code(stmt->while_cond);
-    ir_gen_add(ir_make_if(IRREL_NEQ, cond, ir_make_immd(0), while_end));
+    ir_gen_add(ir_make_if(IRREL_EQU, cond, ir_make_immd(0), while_end));
     Statement_IR_Generate_Code(stmt->while_body);
     ir_gen_add(ir_make_goto(while_begin));
     ir_gen_add(ir_make_label(while_end));
