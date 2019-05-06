@@ -31,9 +31,14 @@ ir_val ir_make_var(size_t varid) {
     return ret;
 }
 
-ir_val ir_make_ref(size_t varid) {
-    ir_val ret = { .type = IRVAL_REF, .varid = varid };
-    return ret;
+ir_val ir_make_ref(ir_val value) {
+    if (value.type == IRVAL_VARIABLE) {
+        ir_val ret = {.type = IRVAL_REF, .varid = value.varid};
+        return ret;
+    } else if (value.type == IRVAL_DEREF) {
+        ir_val ret = {.type = IRVAL_VARIABLE, .varid = value.varid};
+        return ret;
+    } else assert(!"Unsupported value type in make_ref");
 }
 
 ir_val ir_make_deref(size_t varid) {

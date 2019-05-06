@@ -74,7 +74,7 @@ typedef struct ir_instr {
 
 ir_val ir_make_immd(int value);
 ir_val ir_make_var(size_t varid);
-ir_val ir_make_ref(size_t varid);
+ir_val ir_make_ref(ir_val value);
 ir_val ir_make_deref(size_t varid);
 
 ir_instr ir_make_function(const char *func);

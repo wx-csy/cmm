@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
     builtin_declare();
     yyparse();
     builtin_define();
+    assert(!program.varlist && "global variable list is not empty");
     /* lexical, syntax or semantics error */
     if (cmm_nr_error != 0) return EXIT_FAILURE;
     for (FuncList func = program.funclist; func; func = func->next)

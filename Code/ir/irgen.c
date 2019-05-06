@@ -5,7 +5,11 @@
 #include "stdio.h"
 #include "option.h"
 
-IRList define_dlist(ir_list);
+IRList ir_list = {
+    .data = { .type = IRINSTR_NULL },
+    .prev = &ir_list,
+    .next = &ir_list
+};
 
 void ir_gen_add(ir_instr instr) {
     dlist_insert(&ir_list, instr);

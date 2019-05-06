@@ -286,6 +286,17 @@ static ir_val _binary_logic_or_gen(Expression *expr) {
     return dest;
 }
 
+static ir_val _array_access_gen(Expression *expr) {
+    ir_val val_addr = ir_make_var(ir_newvar()), index = ir_make_var(ir_newvar());
+    ir_val addr = ir_make_ref(Expression_IR_Generate_Code(expr->lhs));
+    ir_gen_add(ir_make_binary_op(
+        IRBOP_STAR, index,
+        Expression_IR_Generate_Code(expr->rhs),
+        ir_make_immd((int)expr->lhs->valtype->underlying->width)));
+    ir_gen_add(ir_make_binary_op(IRBOP_ADD, val_addr, addr, index));
+    return ir_make_deref(val_addr.varid);
+}
+
 static ir_val _binary_expr_ir_gen(Expression *expr) {
     switch (expr->bop_type) {
     case BOP_ADD:
@@ -305,8 +316,7 @@ static ir_val _binary_expr_ir_gen(Expression *expr) {
     case BOP_OR:
         return _binary_logic_or_gen(expr);
     case BOP_ARRAY_ACCESS:
-        assert(!"unimplemented");
-        break;
+        return _array_access_gen(expr);
     }
     assert(0);
 }
@@ -361,7 +371,13 @@ static ir_val _funccall_ir_gen(Expression *expr) {
 }
 
 static ir_val _member_access_ir_gen(Expression *expr) {
-    assert(!"unimplemented");
+    ir_val val_addr = ir_make_var(ir_newvar());
+    ir_gen_add(ir_make_binary_op(
+        IRBOP_ADD, val_addr,
+        ir_make_ref(Expression_IR_Generate_Code(expr->expr)),
+        ir_make_immd((int)expr->member->offset)
+    ));
+    return ir_make_deref(val_addr.varid);
 }
 
 static ir_val _variable_ir_gen(Expression *expr) {

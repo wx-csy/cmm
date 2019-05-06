@@ -9,9 +9,6 @@
         struct tname *prev, *next;                                          \
     }
 
-#define define_dlist(name)                                                  \
-    name = {.prev = &name, . next = &name}
-
 #define dlist_init(plist)                                                   \
     ((plist)->next = (plist)->prev = (plist))
 
