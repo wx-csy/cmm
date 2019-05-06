@@ -28,4 +28,5 @@
         while (*_plist) _plist = &((*_plist)->next);                        \
         *_plist = list2;                                                    \
     } while (0)
+
 #endif
