@@ -3,6 +3,7 @@
 #include "ast/expression.h"
 #include "ast/function.h"
 #include "ir.h"
+#include "option.h"
 
 Statement Statement_Invalid = { .type = STMT_INVALID };
 
@@ -84,7 +85,7 @@ void Statement_IR_Generate_Declaration(Statement *stmt) {
 }
 
 static void _return_ir_gen(Statement *stmt) {
-    if (stmt->expr->type == EXPR_FUNCCALL) {
+    if (opt_optimize && stmt->expr->type == EXPR_FUNCCALL) {
         /* tail call optimization */
         Expression_TailCall_IR_Generate_Code(stmt->expr);
     } else {
