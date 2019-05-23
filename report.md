@@ -115,15 +115,28 @@ make clean
 
 对于表达式而言，中间代码由下表生成：
 
-| Type            | IR Code                    |
-| --------------- | -------------------------- |
-| INT             | **tmp** := #INT            |
-| a *binary_op* b | **tmp** := a *binary_op* b |
-| *unary_op* a    | **tmp** := *unary_op* a    |
-| a = b           | **a** := b                 |
-| a *relop* b     | **tmp** := 1<br />if       |
+| Type            | IR Code                                                      |
+| --------------- | ------------------------------------------------------------ |
+| INT             | **tmp** := #INT                                              |
+| a *binary_op* b | **tmp** := a *binary_op* b                                   |
+| *unary_op* a    | **tmp** := *unary_op* a                                      |
+| a = b           | **a** := b                                                   |
+| a *relop* b     | **tmp** := 1<br />IF a *relop* b GOTO l1<br />**tmp** := 0<br />l1: |
+| a && b          | **tmp** := 0<br />IF a == 0 GOTO l1<br />IF b == 0 GOTO l1<br />**tmp** := 1<br />l1: |
+| a \|\| b        | 同上，但0,1互换                                              |
+| ! a             | **tmp** := 0<br />IF a == 0 GOTO l1<br />**tmp** := 1<br />l1: |
+
+对于语句，中间代码生成方式如下：
+
+| Type              | IR Code                                                      |
+| ----------------- | ------------------------------------------------------------ |
+| RETURN a;         | (compute a)<br />RETURN a                                    |
+| if (a) s;         | (compute a)<br />IF a == 0 GOTO l1<br />s<br />l1:           |
+| if (a) s; else t; | (compute a)<br />IF a == 0 GOTO l1<br />s<br />GOTO l2<br />l1: t<br />l2: |
+| while (a) s;      | l0: (compute a)<br />if a == 0 GOTO l1<br />s<br />GOTO l0   |
+| func(a1, a2, ...) | ...<br />(compute a2)<br />ARG a2<br />(compute a1)<br />ARG a1<br />CALL func |
 
 ## 实验总结
 
-
+本次实验在上一次实验的基础上进行，通过遍历抽象语法树并按照翻译模式进行翻译，将代码翻译成中间表示。
 

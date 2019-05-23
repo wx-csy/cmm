@@ -427,3 +427,59 @@ ir_val Expression_IR_Generate_Code(Expression *expr) {
     }
     assert(0);
 }
+
+void Cond_IR_Gen(Expression *expr, size_t label_true, size_t label_false) {
+    if (expr->type == EXPR_UNARY_EXPR && expr->uop_type == UOP_NOT) {
+        Cond_IR_Gen(expr->rhs, label_false, label_true);
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_AND) {
+        size_t tmplabel = ir_newlabel();
+        Cond_IR_Gen(expr->lhs, tmplabel, label_false);
+        ir_gen_add(ir_make_label(tmplabel));
+        Cond_IR_Gen(expr->rhs, label_true, label_false);
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_OR) {
+        size_t tmplabel = ir_newlabel();
+        Cond_IR_Gen(expr->lhs, label_true, tmplabel);
+        ir_gen_add(ir_make_label(tmplabel));
+        Cond_IR_Gen(expr->rhs, label_true, label_false);
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_GE) {
+        ir_gen_add(ir_make_if(IRREL_GE,
+            Expression_IR_Generate_Code(expr->lhs),
+            Expression_IR_Generate_Code(expr->rhs),
+            label_true));
+        ir_gen_add(ir_make_goto(label_false));
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_LE) {
+        ir_gen_add(ir_make_if(IRREL_LE,
+            Expression_IR_Generate_Code(expr->lhs),
+            Expression_IR_Generate_Code(expr->rhs),
+            label_true));
+        ir_gen_add(ir_make_goto(label_false));
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_GT) {
+        ir_gen_add(ir_make_if(IRREL_GT,
+            Expression_IR_Generate_Code(expr->lhs),
+            Expression_IR_Generate_Code(expr->rhs),
+            label_true));
+        ir_gen_add(ir_make_goto(label_false));
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_LT) {
+        ir_gen_add(ir_make_if(IRREL_LT,
+            Expression_IR_Generate_Code(expr->lhs),
+            Expression_IR_Generate_Code(expr->rhs),
+            label_true));
+        ir_gen_add(ir_make_goto(label_false));
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_EQU) {
+        ir_gen_add(ir_make_if(IRREL_EQU,
+            Expression_IR_Generate_Code(expr->lhs),
+            Expression_IR_Generate_Code(expr->rhs),
+            label_true));
+        ir_gen_add(ir_make_goto(label_false));
+    } else if (expr->type == EXPR_BINARY_EXPR && expr->bop_type == BOP_NEQ) {
+        ir_gen_add(ir_make_if(IRREL_NEQ,
+            Expression_IR_Generate_Code(expr->lhs),
+            Expression_IR_Generate_Code(expr->rhs),
+            label_true));
+        ir_gen_add(ir_make_goto(label_false));
+    } else {
+        ir_gen_add(ir_make_if(IRREL_EQU,
+            Expression_IR_Generate_Code(expr), ir_make_immd(0), label_false));
+        ir_gen_add(ir_make_goto(label_true));
+    }
+}

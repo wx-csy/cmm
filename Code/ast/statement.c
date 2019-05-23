@@ -95,17 +95,17 @@ static void _return_ir_gen(Statement *stmt) {
 }
 
 static void _ifthen_ir_gen(Statement *stmt) {
-    ir_val cond = Expression_IR_Generate_Code(stmt->if_cond);
-    size_t if_false_label = ir_newlabel();
-    ir_gen_add(ir_make_if(IRREL_EQU, cond, ir_make_immd(0), if_false_label));
+    size_t if_true_label = ir_newlabel(), if_false_label = ir_newlabel();
+    Cond_IR_Gen(stmt->if_cond, if_true_label, if_false_label);
+    ir_gen_add(ir_make_label(if_true_label));
     Statement_IR_Generate_Code(stmt->stat_if_true);
     ir_gen_add(ir_make_label(if_false_label));
 }
 
 static void _ifthenelse_ir_gen(Statement *stmt) {
-    ir_val cond = Expression_IR_Generate_Code(stmt->if_cond);
-    size_t if_false_label = ir_newlabel(), if_end_label = ir_newlabel();
-    ir_gen_add(ir_make_if(IRREL_EQU, cond, ir_make_immd(0), if_false_label));
+    size_t if_true_label = ir_newlabel(), if_false_label = ir_newlabel(), if_end_label = ir_newlabel();
+    Cond_IR_Gen(stmt->if_cond, if_true_label, if_false_label);
+    ir_gen_add(ir_make_label(if_true_label));
     Statement_IR_Generate_Code(stmt->stat_if_true);
     ir_gen_add(ir_make_goto(if_end_label));
     ir_gen_add(ir_make_label(if_false_label));
@@ -114,10 +114,10 @@ static void _ifthenelse_ir_gen(Statement *stmt) {
 }
 
 static void _while_ir_gen(Statement *stmt) {
-    size_t while_begin = ir_newlabel(), while_end = ir_newlabel();
+    size_t while_begin = ir_newlabel(), while_block = ir_newlabel(), while_end = ir_newlabel();
     ir_gen_add(ir_make_label(while_begin));
-    ir_val cond = Expression_IR_Generate_Code(stmt->while_cond);
-    ir_gen_add(ir_make_if(IRREL_EQU, cond, ir_make_immd(0), while_end));
+    Cond_IR_Gen(stmt->if_cond, while_block, while_end);
+    ir_gen_add(ir_make_label(while_block));
     Statement_IR_Generate_Code(stmt->while_body);
     ir_gen_add(ir_make_goto(while_begin));
     ir_gen_add(ir_make_label(while_end));
