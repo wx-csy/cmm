@@ -20,11 +20,6 @@ Function *Function_Constructor(const char *name, cmm_loc_t location, Type *retty
 }
 
 bool Function_Declaration_Compatible(Function *func1, Function *func2) {
-    /* TODO: currently, we define two function declaration as compatible
-     *   if and only if the return type and param list are compatible.
-     *   This is problematic: two arrays declared with different sizes
-     *   may lead to binary incompatibility during assignment.
-     */
     if (!Type_Compatible(func1->rettype, func2->rettype))
         return false;
     VarList list1 = func1->paramlist, list2 = func2->paramlist;

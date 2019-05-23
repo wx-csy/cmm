@@ -85,6 +85,7 @@ void Statement_IR_Generate_Declaration(Statement *stmt) {
 }
 
 static void _return_ir_gen(Statement *stmt) {
+    assert(Type_Is_Int(stmt->expr->valtype));
     if (opt_optimize && stmt->expr->type == EXPR_FUNCCALL) {
         /* tail call optimization */
         Expression_TailCall_IR_Generate_Code(stmt->expr);

@@ -331,7 +331,7 @@ static ir_val _unary_not_ir_gen(Expression *expr) {
     size_t tmplabel = ir_newlabel();
     ir_val dest = ir_make_var(ir_newvar());
     ir_gen_add(ir_make_assign(dest, ir_make_immd(0)));
-    ir_gen_add(ir_make_if(IRREL_EQU, Expression_IR_Generate_Code(expr->rhs), ir_make_immd(0), tmplabel));
+    ir_gen_add(ir_make_if(IRREL_NEQ, Expression_IR_Generate_Code(expr->rhs), ir_make_immd(0), tmplabel));
     ir_gen_add(ir_make_assign(dest, ir_make_immd(1)));
     ir_gen_add(ir_make_label(tmplabel));
     return dest;
@@ -347,6 +347,7 @@ static ir_val _unary_expr_ir_gen(Expression *expr) {
 
 static ir_val _assign_expr_ir_gen(Expression *expr) {
     ir_val dest = Expression_IR_Generate_Code(expr->lhs);
+    assert(Type_Is_Int(expr->valtype));
     ir_gen_add(ir_make_assign(dest, Expression_IR_Generate_Code(expr->rhs)));
     return dest;
 }
