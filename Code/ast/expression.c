@@ -355,7 +355,12 @@ static void _arglist_ir_push(ArgList arglist) {
     if (!arglist) return;
     ir_val temp = Expression_IR_Generate_Code(arglist->data);
     _arglist_ir_push(arglist->next);
-    ir_gen_add(ir_make_arg(temp));
+    if (arglist->data->valtype->typector == TC_STRUCT ||
+        arglist->data->valtype->typector == TC_ARRAY) {
+        ir_gen_add(ir_make_arg(ir_make_ref(temp)));
+    } else {
+        ir_gen_add(ir_make_arg(temp));
+    }
 }
 
 static ir_val _funccall_ir_gen(Expression *expr) {
@@ -396,7 +401,6 @@ static ir_val _read_ir_gen(Expression *expr) {
     ir_gen_add(ir_make_read(dest));
     return dest;
 }
-
 
 static ir_val _write_ir_gen(Expression *expr) {
     ir_gen_add(ir_make_write(Expression_IR_Generate_Code(expr->rhs)));
