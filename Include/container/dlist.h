@@ -2,6 +2,7 @@
 #define __CONTAINER_DLIST_H__
 
 #include "memory.h"
+#include "assert.h"
 
 #define declare_dlist_node(tname, tmember)                                  \
     struct tname {                                                          \
@@ -27,8 +28,9 @@
 
 #define dlist_erase(plist)                                                  \
     do {                                                                    \
-        (plist)->prev->next = (plist)->next;                                \
-        (plist)->next->prev = (plist)->prev;                                \
+        typeof(plist) _plist = (plist);                                     \
+        (_plist)->prev->next = (_plist)->next;                              \
+        (_plist)->next->prev = (_plist)->prev;                              \
     } while (0)
 
 #endif
