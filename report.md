@@ -11,6 +11,9 @@
 ├── Code					// 源代码文件
 │   ├── ast					// 抽象语法树相关代码
 │   │   └── ...
+│   ├── ir					// 中间代码相关
+│   │   ├── optimize.c		// 实现了简单的窥孔优化
+│   │   └── ...
 │   ├── error.c				// 错误处理代码
 │   ├── lexical.l			// flex词法文件
 │   ├── memory.c			// 内存管理代码
@@ -18,19 +21,7 @@
 │   ├── main.c				// 主程序
 │   └── syntax.y			// bison语法文件
 ├── Include					// 头文件
-│   ├── ast					// 抽象语法树相关
-│   │   └── ...
-│   ├── cmm.h
-│   ├── memory.h
-│   ├── symtbl.h
-│   ├── container			// 包含链表等数据结构
-│   │   └── ...
-│   ├── cst.h
-│   ├── ir.h				// 中间代码相关
-│   ├── location.h
-│   ├── option.h
-│   ├── utility.h
-│   └── error.h
+│   └── ...
 ├── Makefile				// Makefile文件
 ├── parser					// 语法分析器可执行文件
 ├── README.txt				// README文件
@@ -131,12 +122,23 @@ make clean
 | Type              | IR Code                                                      |
 | ----------------- | ------------------------------------------------------------ |
 | RETURN a;         | (compute a)<br />RETURN a                                    |
-| if (a) s;         | (compute a)<br />IF a == 0 GOTO l1<br />s<br />l1:           |
-| if (a) s; else t; | (compute a)<br />IF a == 0 GOTO l1<br />s<br />GOTO l2<br />l1: t<br />l2: |
-| while (a) s;      | l0: (compute a)<br />if a == 0 GOTO l1<br />s<br />GOTO l0   |
+| if (a) s;         | (compute cond a)<br />IF a == 0 GOTO l1<br />s<br />l1:      |
+| if (a) s; else t; | (compute cond a)<br />IF a == 0 GOTO l1<br />s<br />GOTO l2<br />l1: t<br />l2: |
+| while (a) s;      | l0: (compute cond a)<br />if a == 0 GOTO l1<br />s<br />GOTO l0 |
 | func(a1, a2, ...) | ...<br />(compute a2)<br />ARG a2<br />(compute a1)<br />ARG a1<br />CALL func |
+
+其中，对于条件表达式，会以实验讲义上所述的方法进行代码生成，具体不再详细介绍。
+
+此外，本次实验中还实现了简单的中间代码优化，需要在参数中指定`-O`才能开启：
+
+1. 尾调用消除：如果某个函数的返回值恰好是函数调用的结果，则不产生函数调用和返回的代码，而是在参数传递完成后，直接跳转到对应函数的入口处；
+2. 简单的窥孔优化（在Code/ir/optimize.c中）：
+   - 删除多余的标签；
+   - 删除连续的return；
+   - 删除跳转到下一条语句的无条件跳转语句；
+   - 移除多余的DEC语句。
 
 ## 实验总结
 
-本次实验在上一次实验的基础上进行，通过遍历抽象语法树并按照翻译模式进行翻译，将代码翻译成中间表示。
+本次实验在上一次实验的基础上进行，通过遍历抽象语法树并按照翻译模式进行翻译，将代码翻译成中间表示，并实现了简单的中间代码优化。
 
