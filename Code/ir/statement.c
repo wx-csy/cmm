@@ -23,12 +23,12 @@ void Statement_IR_Generate_Declaration(Statement *stmt) {
 
 static void _return_ir_gen(Statement *stmt) {
     assert(Type_Is_Int(stmt->expr->valtype));
-    if (opt_optimize && stmt->expr->type == EXPR_FUNCCALL) {
+    //if (opt_optimize && stmt->expr->type == EXPR_FUNCCALL) {
         /* tail call optimization */
-        Expression_TailCall_IR_Generate_Code(stmt->expr);
-    } else {
+    //    Expression_TailCall_IR_Generate_Code(stmt->expr);
+    //} else {
         ir_gen_add(ir_make_return(Expression_IR_Generate_Code(stmt->expr)));
-    }
+    //}
 }
 
 static void _ifthen_ir_gen(Statement *stmt) {
@@ -61,6 +61,7 @@ static void _while_ir_gen(Statement *stmt) {
 }
 
 void Statement_IR_Generate_Code(Statement *stmt) {
+    size_t ir_nextval_save = ir_nextval;
     switch (stmt->type) {
     case STMT_INVALID:
         assert(0);
@@ -80,4 +81,5 @@ void Statement_IR_Generate_Code(Statement *stmt) {
     case STMT_WHILE:
         return _while_ir_gen(stmt);
     }
+    ir_nextval = ir_nextval_save;
 }

@@ -5,6 +5,9 @@
 #include "common.h"
 #include "container/dlist.h"
 
+extern size_t ir_nextlabel;
+extern size_t ir_nextval;
+
 size_t ir_newlabel();
 size_t ir_newvar();
 
@@ -27,6 +30,7 @@ typedef struct ir_val {
 typedef enum IRInstrType {
     IRINSTR_NULL,
     IRINSTR_FUNCTION,
+    IRINSTR_ENDFUNCTION,
     IRINSTR_DEC,
     IRINSTR_PARAM,
     IRINSTR_LABEL,
@@ -78,6 +82,7 @@ ir_val ir_make_ref(ir_val value);
 ir_val ir_make_deref(size_t varid);
 
 ir_instr ir_make_function(const char *func);
+ir_instr ir_make_endfunction(const char *func);
 ir_instr ir_make_dec(ir_val declared, size_t size);
 ir_instr ir_make_param(ir_val declared);
 ir_instr ir_make_label(size_t label);

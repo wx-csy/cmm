@@ -5,14 +5,15 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+size_t ir_nextlabel = 1;
+size_t ir_nextval = 1;
+
 size_t ir_newlabel() {
-    static size_t nextlabel = 1;
-    return nextlabel++;
+    return ir_nextlabel++;
 }
 
 size_t ir_newvar() {
-    static size_t nextval = 1;
-    return nextval++;
+    return ir_nextval++;
 }
 
 #define _IR_COMMENT                                         \
@@ -48,6 +49,11 @@ ir_val ir_make_deref(size_t varid) {
 
 ir_instr ir_make_function(const char *func) {
     ir_instr ret = {.type = IRINSTR_FUNCTION, .func = func};
+    return ret;
+}
+
+ir_instr ir_make_endfunction(const char *func) {
+    ir_instr ret = {.type = IRINSTR_ENDFUNCTION, .func = func};
     return ret;
 }
 

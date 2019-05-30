@@ -1,5 +1,5 @@
-#ifndef __ASM_REGISTER_H__
-#define __ASM_REGISTER_H__
+#ifndef __MIPS_H__
+#define __MIPS_H__
 
 #include "container/dlist.h"
 #include "common.h"
@@ -21,23 +21,12 @@
  * $31      return address
  */
 
-#define MIPS_VOLATILE_MASK  ((uint32_t)(0x00ffff00))
+typedef declare_dlist_node(StrList, char *) StrList;
+extern StrList mips_output;
 
-extern uint32_t asm_free_regs;
+size_t mips_alloc_label();
+void mips_function_enter();
+void mips_append(const char *fmt, ...);
+void mips_function_leave();
 
-size_t asm_allocreg();
-
-void asm_freereg(size_t regid);
-
-void asm_precall();
-
-void asm_postcall();
-
-void asm_enter();
-
-void asm_leave();
-
-typedef declare_dlist_node(AsmList, const char *) AsmList;
-extern AsmList asm_list;
-
-#endif //CMM_REGISTER_H
+#endif

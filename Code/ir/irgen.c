@@ -50,6 +50,9 @@ static void _ir_write_function(FILE *stream, ir_instr instr) {
     fprintf(stream, "\nFUNCTION %s :", instr.func);
 }
 
+static void _ir_write_endfunction(FILE *stream, ir_instr instr) {
+}
+
 static void _ir_write_dec(FILE *stream, ir_instr instr) {
     fprintf(stream, "\tDEC %s %zu", _ir_valstr(instr.dest), instr.dec_size);
 }
@@ -116,6 +119,7 @@ static void _ir_write_write(FILE *stream, ir_instr instr) {
 
 static void (*ir_write_func[256])(FILE *, ir_instr) = {
     [IRINSTR_FUNCTION]  = _ir_write_function,
+    [IRINSTR_ENDFUNCTION]  = _ir_write_endfunction,
     [IRINSTR_DEC]       = _ir_write_dec,
     [IRINSTR_PARAM]     = _ir_write_param,
     [IRINSTR_LABEL]     = _ir_write_label,
