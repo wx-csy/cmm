@@ -111,4 +111,6 @@ Expression_Write_Constructor(cmm_loc_t location, Expression* src);
 void Expression_TailCall_IR_Generate_Code(Expression *expr);
 ir_val Expression_IR_Generate_Code(Expression *expr);
 void Cond_IR_Gen(Expression *expr, size_t label_true, size_t label_false);
+
+
 #endif

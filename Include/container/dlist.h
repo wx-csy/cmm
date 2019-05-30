@@ -26,6 +26,16 @@
         (plist)->prev = newnode;                                            \
     } while (0)
 
+#define dlist_splice(first, second)                                         \
+    do {                                                                    \
+        typeof(first) p1 = first;                                           \
+        typeof(second) p2 = second;                                         \
+        p1->prev->next = p2->next;                                          \
+        p2->next->prev = p1->prev;                                          \
+        p2->prev->next = p1;                                                \
+        p1->prev = p2->prev;                                                \
+    } while (0)
+
 #define dlist_erase(plist)                                                  \
     do {                                                                    \
         typeof(plist) _plist = (plist);                                     \

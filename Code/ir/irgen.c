@@ -28,6 +28,7 @@ void ir_gen_add_with_comment(ir_instr instr, const char *fmt, ...) {
         strcpy(comment, "\t; ");
         va_start(ap, fmt);
         vsnprintf(comment + strlen(comment), (size_t)size, fmt, ap);
+        va_end(ap);
     }
     instr.comment = comment;
     dlist_insert(&ir_list, instr);
