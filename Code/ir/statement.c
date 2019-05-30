@@ -6,11 +6,19 @@
 #include "option.h"
 
 void Statement_IR_Generate_Declaration(Statement *stmt) {
-    if (stmt->type != STMT_COMPOUND) return;
-    for (VarList var = stmt->varlist; var; var = var->next)
-        Variable_IR_Generate_Declaration(var->data, false);
-    for (StmtList subst = stmt->stmtlist; subst; subst = subst->next)
-        Statement_IR_Generate_Declaration(subst->data);
+    if (stmt->type == STMT_COMPOUND) {
+        for (VarList var = stmt->varlist; var; var = var->next)
+            Variable_IR_Generate_Declaration(var->data, false);
+        for (StmtList subst = stmt->stmtlist; subst; subst = subst->next)
+            Statement_IR_Generate_Declaration(subst->data);
+    } else if (stmt->type == STMT_IFTHEN) {
+        Statement_IR_Generate_Declaration(stmt->stat_if_true);
+    } else if (stmt->type == STMT_IFTHENELSE) {
+        Statement_IR_Generate_Declaration(stmt->stat_if_true);
+        Statement_IR_Generate_Declaration(stmt->stat_if_false);
+    } else if (stmt->type == STMT_WHILE) {
+        Statement_IR_Generate_Declaration(stmt->while_body);
+    }
 }
 
 static void _return_ir_gen(Statement *stmt) {
