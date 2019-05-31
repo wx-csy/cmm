@@ -61,7 +61,7 @@ static void _while_ir_gen(Statement *stmt) {
 }
 
 void Statement_IR_Generate_Code(Statement *stmt) {
-    size_t ir_nextval_save = ir_nextval;
+    // size_t ir_nextval_save = ir_nextval;
     switch (stmt->type) {
     case STMT_INVALID:
         assert(0);
@@ -81,5 +81,5 @@ void Statement_IR_Generate_Code(Statement *stmt) {
     case STMT_WHILE:
         return _while_ir_gen(stmt);
     }
-    ir_nextval = ir_nextval_save;
+    // ir_nextval = ir_nextval_save;
 }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include "mips.h"
 #include "ir.h"
 #include "option.h"
@@ -11,13 +12,13 @@ StrList mips_output = {
 };
 
 // function value
-static size_t func_argsize;
+static size_t func_argsize, func_sp;
 static size_t func_retlabel;
 
 static const char *mips_preamble =
     ".data\n"
-    "_prompt: .asciiz \"Enter an integer:\"\n"
-    "_ret: .asciiz \"\n\"\n"
+    "_prompt: .asciiz \"Enter an integer: \"\n"
+    "_ret: .asciiz \"\\n\"\n"
     ".globl main\n"
     ".text\n"
     "\n"
@@ -60,19 +61,21 @@ static void mips_label(size_t label) {
 }
 
 static void mips_pop(size_t dest) {
-    mips_append("\tlw $%zu, 0($sp) # pop", dest);
+    func_sp -= 4;
+    mips_append("\tlw $%zu, 0($sp)\t# pop", dest);
     mips_append("\taddiu $sp, $sp, 4");
 }
 
 static void mips_push(size_t src) {
-    mips_append("\taddiu $sp, $sp, -4 # push");
+    func_sp += 4;
+    mips_append("\taddiu $sp, $sp, -4\t# push");
     mips_append("\tsw $%zu, 0($sp)", src);
 }
 
 static void _ir2mips_getvalue(size_t reg, ir_val val) {
     switch (val.type) {
     case IRVAL_IMMD:
-        mips_append("\tli $%zu, %d", reg, val.immd);
+        mips_append("\tli $%zu, %d # immediate number", reg, val.immd);
         break;
     case IRVAL_VARIABLE:
         mips_append("\tlw $%zu, -%zu($fp)", reg, val.varid);
@@ -88,7 +91,8 @@ static void _ir2mips_getvalue(size_t reg, ir_val val) {
     }
 }
 
-static void _ir2mips_getaddr(size_t reg, ir_val val) {
+__attribute__((unused))
+static void _ir2mips_getaddr(size_t reg, ir_val val)  {
     switch (val.type) {
     case IRVAL_VARIABLE:
         mips_append("\taddiu $%zu, $fp, -%zu", reg, val.varid);
@@ -100,8 +104,22 @@ static void _ir2mips_getaddr(size_t reg, ir_val val) {
     }
 }
 
+static void _ir2mips_assignto(size_t reg, ir_val dest) {
+    switch (dest.type) {
+    case IRVAL_VARIABLE:
+        mips_append("\tsw $%zu, -%zu($fp)", reg, dest.varid);
+        break;
+    case IRVAL_DEREF:
+        mips_append("\tlw $24, -%zu($fp)", dest.varid);
+        mips_append("\tsw $%zu, 0($24)", reg);
+        break;
+    default: assert(!"unexpected value type");
+    }
+}
+
 static void ir2mips_function(const ir_instr *instr) {
     func_argsize = 0;
+    func_sp = 0;
     func_retlabel = ir_newlabel();
 
     mips_append("%s: # function '%s'", instr->func, instr->func);
@@ -115,29 +133,33 @@ static void ir2mips_endfunction(const ir_instr *instr) {
     mips_append("\taddiu $sp, $fp, -8");
     mips_pop(MIPS_REG_FP);
     mips_pop(31);
-    mips_append("\taddiu $sp, $sp, $%zu # clear args", func_argsize);
+    mips_append("\taddiu $sp, $sp, %zu\t# clear args", func_argsize);
     mips_append("\tjr $31");
     mips_append("\tnop");
+    mips_append("%s", "");
 }
 
 static void ir2mips_dec(const ir_instr *instr) {
-    mips_append("\taddiu $sp, $sp, -$%zu # dec v%zu", instr->dec_size, instr->dest.varid);
+    mips_append("\taddiu $sp, $fp, -%zu\t# dec v%zu", instr->dest.varid, instr->dest.varid);
+    func_sp += instr->dec_size;
+    // fprintf(stderr, "ir2mips dec : %zu %zu\n", func_sp, instr->dest.varid);
+    assert(func_sp == instr->dest.varid);
 }
 
 static void ir2mips_param(const ir_instr *instr) {
-    mips_append("\tlw $t0, %zu($fp)", func_argsize);
-    mips_append("\tsw $t0, -%zu($fp)", instr->dest.varid);
+    mips_append("\tlw $t0, %zu($fp) # param", func_argsize);
+    _ir2mips_assignto(MIPS_REG_T0, instr->dest);
     func_argsize += 4;
+    // assert(func_argsize == instr->dest.varid - 8);
 }
 
 static void ir2mips_label(const ir_instr *instr) {
-    mips_append("\t_L%zu:", instr->label);
+    mips_label(instr->label);
 }
 
 static void ir2mips_assign(const ir_instr *instr) {
-    _ir2mips_getaddr(MIPS_REG_T0, instr->dest);
-    _ir2mips_getvalue(MIPS_REG_T1, instr->src1);
-    mips_append("\tsw $9, 0($8)");
+    _ir2mips_getvalue(MIPS_REG_T0, instr->src1);
+    _ir2mips_assignto(MIPS_REG_T0, instr->dest);
 }
 
 static void ir2mips_binary_op(const ir_instr *instr) {
@@ -158,6 +180,7 @@ static void ir2mips_binary_op(const ir_instr *instr) {
         mips_append("\tmflo $8");
         break;
     }
+    _ir2mips_assignto(MIPS_REG_T0, instr->dest);
 }
 
 static void ir2mips_goto(const ir_instr *instr) {
@@ -168,49 +191,55 @@ static void ir2mips_goto(const ir_instr *instr) {
 static void ir2mips_if(const ir_instr *instr) {
     _ir2mips_getvalue(MIPS_REG_T0, instr->src1);
     _ir2mips_getvalue(MIPS_REG_T1, instr->src2);
-    mips_append("\tsubu $8, $8, $9");
     switch (instr->rop) {
     case IRREL_GT:
+        mips_append("\tslt $8, $t1, $t0");
         mips_append("\tbgtz $8, _L%zu", instr->label);
         mips_append("\tnop");
         break;
     case IRREL_LT:
-        mips_append("\tbltz $8, _L%zu", instr->label);
+        mips_append("\tslt $8, $t0, $t1");
+        mips_append("\tbgtz $8, _L%zu", instr->label);
         mips_append("\tnop");
         break;
     case IRREL_GE:
-        mips_append("\tbgez $8, _L%zu", instr->label);
-        mips_append("\tnop");
-        break;
-    case IRREL_LE:
-        mips_append("\tblez $8, _L%zu", instr->label);
-        mips_append("\tnop");
-        break;
-    case IRREL_EQU:
+        mips_append("\tslt $8, $t0, $t1");
         mips_append("\tbeq $8, $0, _L%zu", instr->label);
         mips_append("\tnop");
         break;
+    case IRREL_LE:
+        mips_append("\tslt $8, $t1, $t0");
+        mips_append("\tbeq $8, $0, _L%zu", instr->label);
+        mips_append("\tnop");
+        break;
+    case IRREL_EQU:
+        mips_append("\tbeq $t0, $t1, _L%zu", instr->label);
+        mips_append("\tnop");
+        break;
     case IRREL_NEQ:
-        mips_append("\tbne $8, $0, _L%zu", instr->label);
+        mips_append("\tbne $t0, $t1, _L%zu", instr->label);
         mips_append("\tnop");
         break;
     }
+
 }
 
 static void ir2mips_return(const ir_instr *instr) {
     _ir2mips_getvalue(2, instr->src1);
-    mips_append("\tj _L%zu", instr->label);
+    mips_append("\tj _L%zu", func_retlabel);
     mips_append("\tnop");
 }
 
 static void ir2mips_call(const ir_instr *instr) {
-    mips_append("\tjl %s", instr->func);
+    mips_append("\tjal %s\t# call '%s'", instr->func, instr->func);
     mips_append("\tnop");
+    _ir2mips_assignto(2, instr->dest);
 }
 
 static void ir2mips_arg(const ir_instr *instr) {
     _ir2mips_getvalue(MIPS_REG_T0, instr->src1);
     mips_push(MIPS_REG_T0);
+    func_sp -= 4; // balance stack pointer (decresed by callee)
 }
 
 static void (*ir2mips_helper[256])(const ir_instr *instr) = {

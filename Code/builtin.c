@@ -40,6 +40,6 @@ void builtin_declare() {
 }
 
 void builtin_define() {
-    // Function_IR_Generate_Code(builtin_func_read);
-    // Function_IR_Generate_Code(builtin_func_write);
+    Function_IR_Generate_Code(builtin_func_read);
+    Function_IR_Generate_Code(builtin_func_write);
 }

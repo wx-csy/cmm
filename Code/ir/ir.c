@@ -14,7 +14,7 @@ size_t ir_newlabel() {
 
 size_t ir_newvar(size_t size) {
     ir_nextval += size;
-    ir_make_dec(ir_make_var(ir_nextval), size);
+    ir_gen_add(ir_make_dec(ir_make_var(ir_nextval), size));
     return ir_nextval;
 }
 
