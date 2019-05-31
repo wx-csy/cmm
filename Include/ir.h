@@ -9,7 +9,7 @@ extern size_t ir_nextlabel;
 extern size_t ir_nextval;
 
 size_t ir_newlabel();
-size_t ir_newvar();
+size_t ir_newvar(size_t size);
 
 typedef enum IRValueType {
     IRVAL_NULL,

@@ -15,7 +15,7 @@ static ir_val _binary_arith_ir_gen(Expression *expr) {
     case BOP_DIV: arith_op = IRBOP_DIV; break;
     default: assert(0);
     }
-    ir_val dest = ir_make_var(ir_newvar());
+    ir_val dest = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_binary_op(arith_op, dest,
                                  Expression_IR_Generate_Code(expr->lhs),
                                  Expression_IR_Generate_Code(expr->rhs)
@@ -35,7 +35,7 @@ static ir_val _binary_relop_ir_gen(Expression *expr) {
     default: assert(0);
     }
     size_t tmplabel = ir_newlabel();
-    ir_val dest = ir_make_var(ir_newvar());
+    ir_val dest = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_assign(dest, ir_make_immd(1)));
     ir_gen_add(ir_make_if(rel_op,
                           Expression_IR_Generate_Code(expr->lhs),
@@ -49,7 +49,7 @@ static ir_val _binary_relop_ir_gen(Expression *expr) {
 
 static ir_val _binary_logic_and_gen(Expression *expr) {
     size_t tmplabel = ir_newlabel();
-    ir_val dest = ir_make_var(ir_newvar());
+    ir_val dest = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_assign(dest, ir_make_immd(0)));
     ir_gen_add(ir_make_if(IRREL_EQU, Expression_IR_Generate_Code(expr->lhs), ir_make_immd(0), tmplabel));
     ir_gen_add(ir_make_if(IRREL_EQU, Expression_IR_Generate_Code(expr->rhs), ir_make_immd(0), tmplabel));
@@ -60,7 +60,7 @@ static ir_val _binary_logic_and_gen(Expression *expr) {
 
 static ir_val _binary_logic_or_gen(Expression *expr) {
     size_t tmplabel = ir_newlabel();
-    ir_val dest = ir_make_var(ir_newvar());
+    ir_val dest = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_assign(dest, ir_make_immd(1)));
     ir_gen_add(ir_make_if(IRREL_NEQ, Expression_IR_Generate_Code(expr->lhs), ir_make_immd(0), tmplabel));
     ir_gen_add(ir_make_if(IRREL_NEQ, Expression_IR_Generate_Code(expr->rhs), ir_make_immd(0), tmplabel));
@@ -70,7 +70,7 @@ static ir_val _binary_logic_or_gen(Expression *expr) {
 }
 
 static ir_val _array_access_gen(Expression *expr) {
-    ir_val val_addr = ir_make_var(ir_newvar()), index = ir_make_var(ir_newvar());
+    ir_val val_addr = ir_make_var(ir_newvar(4)), index = ir_make_var(ir_newvar(4));
     ir_val addr = ir_make_ref(Expression_IR_Generate_Code(expr->lhs));
     ir_gen_add(ir_make_binary_op(
         IRBOP_STAR, index,
@@ -105,14 +105,14 @@ static ir_val _binary_expr_ir_gen(Expression *expr) {
 }
 
 static ir_val _unary_negate_ir_gen(Expression *expr) {
-    ir_val dest = ir_make_var(ir_newvar());
+    ir_val dest = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_binary_op(IRBOP_MINUS, dest, ir_make_immd(0), Expression_IR_Generate_Code(expr->rhs)));
     return dest;
 }
 
 static ir_val _unary_not_ir_gen(Expression *expr) {
     size_t tmplabel = ir_newlabel();
-    ir_val dest = ir_make_var(ir_newvar());
+    ir_val dest = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_assign(dest, ir_make_immd(0)));
     ir_gen_add(ir_make_if(IRREL_NEQ, Expression_IR_Generate_Code(expr->rhs), ir_make_immd(0), tmplabel));
     ir_gen_add(ir_make_assign(dest, ir_make_immd(1)));
@@ -148,21 +148,16 @@ static void _arglist_ir_push(ArgList arglist) {
 }
 
 static ir_val _funccall_ir_gen(Expression *expr) {
-    ir_val dest = ir_make_var(ir_newvar());
-    if (strcmp(expr->func->name, "read") == 0) {
-        ir_gen_add(ir_make_read(dest));
-    } else if (strcmp(expr->func->name, "write") == 0) {
-        ir_gen_add(ir_make_write(Expression_IR_Generate_Code(expr->arglist->data)));
-        ir_gen_add(ir_make_assign(dest, ir_make_immd(0)));
-    } else {
-        _arglist_ir_push(expr->arglist);
-        ir_gen_add(ir_make_call(dest, expr->func->name));
-    }
+    ir_val dest = ir_make_var(ir_newvar(4));
+
+    _arglist_ir_push(expr->arglist);
+    ir_gen_add(ir_make_call(dest, expr->func->name));
+
     return dest;
 }
 
 static ir_val _member_access_ir_gen(Expression *expr) {
-    ir_val val_addr = ir_make_var(ir_newvar());
+    ir_val val_addr = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_binary_op(
         IRBOP_ADD, val_addr,
         ir_make_ref(Expression_IR_Generate_Code(expr->expr)),
@@ -181,7 +176,7 @@ static ir_val _literal_ir_gen(Expression *expr) {
 }
 
 static ir_val _read_ir_gen(Expression *expr) {
-    ir_val dest = ir_make_var(ir_newvar());
+    ir_val dest = ir_make_var(ir_newvar(4));
     ir_gen_add(ir_make_read(dest));
     return dest;
 }

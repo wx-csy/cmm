@@ -7,6 +7,7 @@
 #include "ast/function.h"
 #include "builtin.h"
 #include "ir.h"
+#include "mips.h"
 
 Program program;
 
@@ -21,7 +22,9 @@ int main(int argc, char *argv[]) {
     for (FuncList func = program.funclist; func; func = func->next)
         Function_IR_Generate_Code(func->data);
     if (opt_optimize) ir_optimize();
-    ir_gen_output();
+    //  ir_gen_output();
+    ir2mips(&ir_list);
+    print_mips();
     return 0;
 }
 

@@ -6,14 +6,16 @@
 #include <stdarg.h>
 
 size_t ir_nextlabel = 1;
-size_t ir_nextval = 1;
+size_t ir_nextval = 0;
 
 size_t ir_newlabel() {
     return ir_nextlabel++;
 }
 
-size_t ir_newvar() {
-    return ir_nextval++;
+size_t ir_newvar(size_t size) {
+    ir_nextval += size;
+    ir_make_dec(ir_make_var(ir_nextval), size);
+    return ir_nextval;
 }
 
 #define _IR_COMMENT                                         \

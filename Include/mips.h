@@ -3,6 +3,7 @@
 
 #include "container/dlist.h"
 #include "common.h"
+#include "ir.h"
 
 /*
  * MIPS register convention
@@ -21,12 +22,21 @@
  * $31      return address
  */
 
+#define MIPS_REG_SP 29
+#define MIPS_REG_FP 30
+
+#define MIPS_REG_T0 8
+#define MIPS_REG_T1 9
+
+/*
+ * Calling Convention
+ * 1. arguments are pushed from right to left to the stack
+ * 2. the callee is responsible for clearing the stack
+ */
+
 typedef declare_dlist_node(StrList, char *) StrList;
 extern StrList mips_output;
-
-size_t mips_alloc_label();
-void mips_function_enter();
-void mips_append(const char *fmt, ...);
-void mips_function_leave();
+void ir2mips(IRList *ir_list);
+void print_mips();
 
 #endif

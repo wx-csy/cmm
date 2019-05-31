@@ -5,7 +5,7 @@
 #include "ir.h"
 
 void Function_IR_Generate_Code(Function *func) {
-    ir_nextval = 0;
+    ir_nextval = 8;
     func->ir_start_label = ir_newlabel();
     ir_gen_add(ir_make_function(func->name));
     ir_gen_add(ir_make_label(func->ir_start_label));
