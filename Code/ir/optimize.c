@@ -14,16 +14,7 @@ static bool optimizer_del_adjacent_return() {
     return false;
 };
 
-static bool optimizer_remove_extra_dec() {
-    ir_foreach(iter) {
-        if (iter->data.type == IRINSTR_DEC && iter->data.dec_size == 4) {
-            dlist_erase(iter);
-            return true;
-        }
-    }
-    return false;
-};
-
+__attribute__((unused))
 static bool optimizer_remove_extra_label() {
     ir_foreach(iter) {
         if (iter->data.type == IRINSTR_LABEL) {
@@ -53,9 +44,8 @@ static bool optimizer_remove_jump_next_instr() {
 
 static bool (*ir_optimizer[256])() = {
     optimizer_del_adjacent_return,
-    optimizer_remove_extra_dec,
     optimizer_remove_jump_next_instr,
-    optimizer_remove_extra_label,
+    // optimizer_remove_extra_label,
 };
 
 void ir_optimize() {
