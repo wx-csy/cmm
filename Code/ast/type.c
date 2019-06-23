@@ -46,7 +46,7 @@ bool Type_Compatible(Type *type1, Type *type2) {
 
 Type *Type_Basic_Constructor(enum BasicType basictype) {
     return &basic_type[basictype];
-};
+}
 
 
 Type *Type_Array_Constructor(size_t extent) {

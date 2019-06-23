@@ -11,7 +11,7 @@ CFLAGS  += -fsanitize=undefined -fsanitize=address
 # CFLAGS  += -DDEBUG
 
 LDFLAGS = $(CFLAGS)
-LDFLAGS += -lfl -ly
+# LDFLAGS += -lfl -ly
 
 BUILD_DIR     = Build
 SRC_DIR       = Code
@@ -37,7 +37,7 @@ $(BUILD_DIR)/%.d : $(SRC_DIR)/%.c
 	@echo + [DEP] $@
 	@$(CC) $(CFLAGS) -M -MMD -o $@ $<
 
--include $(COBJS:.o=.d)
+-include $(OBJS:.o=.d)
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)

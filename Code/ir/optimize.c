@@ -12,7 +12,7 @@ static bool optimizer_del_adjacent_return() {
         }
     }
     return false;
-};
+}
 
 __attribute__((unused))
 static bool optimizer_remove_extra_label() {
@@ -27,7 +27,7 @@ static bool optimizer_remove_extra_label() {
         fail:;
     }
     return false;
-};
+}
 
 static bool optimizer_remove_jump_next_instr() {
     ir_foreach(iter) {
@@ -39,7 +39,7 @@ static bool optimizer_remove_jump_next_instr() {
         }
     }
     return false;
-};
+}
 
 
 static bool (*ir_optimizer[256])() = {

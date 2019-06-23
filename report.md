@@ -1,4 +1,4 @@
-# 实验三 中间代码生成 实验报告
+# 实验四 目标代码生成 实验报告
 
 匡亚明学院 陈劭源 161240004
 
@@ -14,6 +14,8 @@
 │   ├── ir					// 中间代码相关
 │   │   ├── optimize.c		// 实现了简单的窥孔优化
 │   │   └── ...
+│   ├── mips				// 代码生成相关
+│   │   └── mips.c
 │   ├── error.c				// 错误处理代码
 │   ├── lexical.l			// flex词法文件
 │   ├── memory.c			// 内存管理代码
@@ -73,7 +75,7 @@ make run
 即可运行语法分析器。语法分析器默认从标准输入读入c--源代码，可以通过参数指定从文件读入：
 
 ```bash
-./parser source_file
+./parser source_file dest_file
 ```
 
 运行
@@ -86,59 +88,37 @@ make clean
 
 ## 完成的功能点
 
-
-1. 将没有语义错误的c--源代码翻译成中间代码；
-
-2. （选做）允许定义结构体类型的变量，并且可以将结构体类型作为函数参数，但是
-    - 结构体**不允许**作为函数的返回值类型，也**不允许**结构体之间互相赋值；
-    - 结构体的等价方式采用**名等价**；
-    - 结构体作为函数参数时，遵循**按值传递**规则（即函数内修改结构体不会影响调用者中结构体的值）。
-
-3. （选做）允许定义任意维数组，并且数组可以作为函数参数，但是
-    - 数组**不能**作为函数返回值类型；
-    - 任何情况下均**不允许**数组之间互相赋值（即使它们的维数和每维大小都相同）；
-    - 数组作为参数传递时，必须确保数组的**维数**和**每维的大小**都匹配；
-    - 数组作为函数参数时，遵循**按值传递**规则（即函数内修改数组不会影响调用者中数组的值）。**这一点与C和C++的规定并不一致，请特别注意。**
+将没有语义错误的c--源代码翻译成MIPS32指令序列，并能够在SPIM Simulator上运行。
 
 ## 实现方法
 
-本次实验在上次实验构建的抽象语法树上进行。具体来说，根据抽象语法树节点的类型，生成不同的中间代码语句。
+本次实验是基于中间代码生成目标代码的。本实验中，采用如下调用约定
 
-对于表达式而言，中间代码由下表生成：
+1. \$fp中存放栈基地址指针，0(\$fp)存放返回地址， -4(\$fp)存放上层函数的栈基地址指针；
+2. 函数参数按照从右向左的顺序依次压入栈中；
+3. 将函数参数弹出栈是被调用者的责任。
 
-| Type            | IR Code                                                      |
-| --------------- | ------------------------------------------------------------ |
-| INT             | **tmp** := #INT                                              |
-| a *binary_op* b | **tmp** := a *binary_op* b                                   |
-| *unary_op* a    | **tmp** := *unary_op* a                                      |
-| a = b           | **a** := b                                                   |
-| a *relop* b     | **tmp** := 1<br />IF a *relop* b GOTO l1<br />**tmp** := 0<br />l1: |
-| a && b          | **tmp** := 0<br />IF a == 0 GOTO l1<br />IF b == 0 GOTO l1<br />**tmp** := 1<br />l1: |
-| a \|\| b        | 同上，但0,1互换                                              |
-| ! a             | **tmp** := 0<br />IF a == 0 GOTO l1<br />**tmp** := 1<br />l1: |
+本次实验只需要把中间代码逐条翻译成MIPS代码即可。具体的翻译规则如下：
 
-对于语句，中间代码生成方式如下：
+|        IR Code        |                          MIPS Code                           |
+| :-------------------: | :----------------------------------------------------------: |
+|       LABEL x :       |                             x :                              |
+|     FUNCTION f :      | f :<br />push(\$ra)<br />push(\$fp)<br />addiu \$fp, \$sp, 8 |
+|    (end function)     | f_ret :<br />addiu \$sp, \$fp, -8<br />pop(\$fp)<br />pop(\$ra)<br />addiu \$sp, \$sp, #argsize<br />jr $ra<br />nop |
+|        x := y         |           getvalue(\$t0, y)<br />assignto(\$t0, x)           |
+|     x := y [op] z     | getvalue(\$t0, y)<br />getvalue(\$t1, z)<br />[op] \$t0, \$t0, \$t1<br />assignto(\$t0, x) |
+|        GOTO x         |                         j x<br />nop                         |
+| IF x [relop] y GOTO z | getvalue(\$t0, x)<br />getvalue(\$t1, y)<br />b[relop] \$t0, \$t1, z<br />nop |
+|       RETURN x        |           getvalue(\$v0, x)<br />j f_ret<br />nop            |
+|     DEC x [size]      |                   addiu \$sp, \$sp, -size                    |
+|         ARG x         |              getvalue(\$t0, x)<br />push(\$t0)               |
+|      x := CALL f      |            jal f<br />nop<br />assignto(\$v0, x)             |
+|        PARAM x        |         lw \$t0, offset(\$fp)<br />assignto(\$t0, x)         |
 
-| Type              | IR Code                                                      |
-| ----------------- | ------------------------------------------------------------ |
-| RETURN a;         | (compute a)<br />RETURN a                                    |
-| if (a) s;         | (compute cond a)<br />IF a == 0 GOTO l1<br />s<br />l1:      |
-| if (a) s; else t; | (compute cond a)<br />IF a == 0 GOTO l1<br />s<br />GOTO l2<br />l1: t<br />l2: |
-| while (a) s;      | l0: (compute cond a)<br />if a == 0 GOTO l1<br />s<br />GOTO l0 |
-| func(a1, a2, ...) | ...<br />(compute a2)<br />ARG a2<br />(compute a1)<br />ARG a1<br />CALL func |
+其中，push(reg)表示把reg压入栈中，pop(reg)表示把栈顶元素弹至reg中，getvalue(reg, x)表示把x的值加载到reg中，assignto(reg, x)表示把reg中的值保存到x中。
 
-其中，对于条件表达式，会以实验讲义上所述的方法进行代码生成，具体不再详细介绍。
-
-此外，本次实验中还实现了简单的中间代码优化，需要在参数中指定`-O`才能开启：
-
-1. 尾调用消除：如果某个函数的返回值恰好是函数调用的结果，则不产生函数调用和返回的代码，而是在参数传递完成后，直接跳转到对应函数的入口处；
-2. 简单的窥孔优化（在Code/ir/optimize.c中）：
-   - 删除多余的标签；
-   - 删除连续的return；
-   - 删除跳转到下一条语句的无条件跳转语句；
-   - 移除多余的DEC语句。
+本次实验采用了朴素寄存器分配算法，即仅当变量的值使用时才加载入内存中，改变内存的值时立即将新值写入内存。
 
 ## 实验总结
 
-本次实验在上一次实验的基础上进行，通过遍历抽象语法树并按照翻译模式进行翻译，将代码翻译成中间表示，并实现了简单的中间代码优化。
-
+本次实验在上一次实验的基础上进行，只需要将IR语句逐条翻译成MIPS指令即可，较为简单。
